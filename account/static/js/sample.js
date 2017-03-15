@@ -5,5 +5,10 @@ window.addEventListener('load',
             alert('Hello');
             }
             , false);
+        document.getElementById('submit').addEventListener('click', clickSubmit, false);
     }
     , false);
+
+
+function clickSubmit() {
+}
