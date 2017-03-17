@@ -22,12 +22,13 @@ function getFromAPI(api, afterFunction) {
 }
 
 //POST
-function postToAPI(api, afterFunction) {
+function postToAPI(api, data, afterFunction) {
     let url = api;
     let xhr = XMLHttpRequestCreate();
+    data = JSON.stringify(data);
     xhr.open("POST", url);
     xhr.setRequestHeader("Content-Type", "application/json");
-    //xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+    xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
     xhr.onreadystatechange = function(event) {
         if (xhr.readyState === 4) {
             //console.log(xhr.responseText);
@@ -66,3 +67,24 @@ function XMLHttpRequestCreate(){
     return null;
 }
 
+function getCookie(name)
+{
+    let result = null;
+    let cookieName = name + '=';
+    let allcookies = document.cookie;
+
+    let position = allcookies.indexOf(cookieName);
+    if (position != -1)
+    {
+        let startIndex = position + cookieName.length;
+
+        let endIndex = allcookies.indexOf(';', startIndex);
+        if (endIndex == -1)
+        {
+            endIndex = allcookies.length;
+        }
+
+        result = decodeURIComponent(allcookies.substring(startIndex, endIndex));
+    }
+    return result;
+}
