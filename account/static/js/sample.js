@@ -19,8 +19,13 @@ function afterPost(responseText) {
 
 function clickPost() {
     let villageName = document.getElementById('ipt_villageName').value;
+    let password = document.getElementById('ipt_password').value;
+    var shaObj = new jsSHA(password, "ASCII");
+    var sha256digest = shaObj.getHash("SHA-256", "HEX");
     let data = {
-        name: villageName
+        name: villageName,
+        password: sha256digest
     };
+    console.log(data);
     postToAPI('http://127.0.0.1:8000/api/tables/', data, afterPost);
 }
