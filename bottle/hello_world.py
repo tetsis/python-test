@@ -1,5 +1,72 @@
-from bottle import route, run, template, get, post, put, delete, request
+from bottle import route, run, template, get, post, put, delete, request, view, HTTPResponse, static_file, url
+import json
 
+village = {}
+
+#### views ####
+
+# トップページ
+@route('/')
+@view('index')
+def index():
+    return dict()
+
+# 村参加ページ
+@route('/participate/')
+@view('participate')
+def participate():
+    return dict(url=url)
+
+# 村作成ページ
+@route('/create/')
+@view('create')
+def create():
+    return dict(url=url)
+
+# ログインページ
+@route('/<village_name:re:[0-9A-Za-z]*>/login/')
+@view('login')
+def login(village_name):
+    return dict(url=url, village_name=village_name)
+#### /views ####
+
+#### API ####
+@get('/api/')
+def get_api():
+    global village
+    body = json.dumps(village)
+    r = HTTPResponse(status=200, body=body)
+    r.set_header('Content-Type', 'application/json')
+    return r
+
+@post('/api/')
+def post_api():
+    global village
+    village_name = request.json.get("village_name")
+    password = request.json.get("password")
+    village[village_name] = password
+    r = HTTPResponse(status=200)
+    return r
+
+@get('/api/<village_name:re:[0-9A-Za-z]*>/')
+def get_village(village_name):
+    global village
+    if village_name in village:
+        data = {'village_name': village_name}
+        body = json.dumps(data)
+        r = HTTPResponse(status=200, body=body)
+        r.set_header('Content-Type', 'application/json')
+    else:
+        r = HTTPResponse(status=404)
+    return r
+
+#### /API ####
+
+@route('/static/<filepath:path>', name='static_file')
+def static(filepath):
+    return static_file(filepath, root="./static")
+
+#### 以下サンプル ####
 # routeデコレーター
 # これを使用してURLのPathと関数をマッピングする。
 @route('/hello')

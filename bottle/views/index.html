@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="ja">
+    <head>
+        <meta charset="utf-8">
+        <title>ワンナイト人狼</title>
+        <!--<link rel="stylesheet" href="{% static 'css/style.css' %}">-->
+        <!--<script type="text/javascript" src="{% static 'js/sha256.js' %}"></script>-->
+    </head>
+    <body>
+        <button type="button" class="btn btn-primary" id="btn_participate">村に参加</button>
+        <button type="button" class="btn btn-primary" id="btn_create">村を作成</button>
+    </body>
+    <script type="text/javascript">
+        document.getElementById('btn_participate').addEventListener('click',
+            function() {
+                window.location.href = 'participate/';
+            }
+            , false);
+
+        document.getElementById('btn_create').addEventListener('click',
+            function() {
+                window.location.href = 'create/';
+            }
+        , false);
+
+    </script>
+</html>

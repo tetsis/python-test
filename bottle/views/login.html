@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ja">
+    <head>
+        <meta charset="utf-8">
+        <title>ログイン - {{village_name}}村</title>
+    </head>
+    <body>
+        <div class="form-group">
+        <label for="villageName">名前</label>
+        <input type="text" class="form-control" id="ipt_villageName" placeholder="Name">
+        </div>
+        <div class="form-group">
+        <label for="password">パスワード</label>
+        <input type="password" class="form-control" id="ipt_password" placeholder="Password">
+        </div>
+        <button type="button" class="btn btn-primary" id="btn_participate">ログイン</button>
+    </body>
+    <script type="text/javascript" src="{{url('static_file', filepath='js/common.js')}}"></script>
+    <script type="text/javascript">
+        function afterGet(status, response) {
+            //console.log(response['village_name']);
+            let hostname = window.location.hostname;
+            let port = window.location.port;
+            let villageName = response['village_name'];
+            if (status == 200) {
+                window.location.href = 'http://' + hostname + ':' + port + '/' + villageName + '/login/';
+            }
+        }
+        document.getElementById('btn_participate').addEventListener('click',
+            function() {
+                let hostname = window.location.hostname;
+                let port = window.location.port;
+                let ipt_villageName = document.getElementById('ipt_villageName').value;
+                getFromAPI('http://' + hostname + ':' + port + '/api/' + ipt_villageName + '/', afterGet);
+            }
+            , false);
+    </script>
+</html>
