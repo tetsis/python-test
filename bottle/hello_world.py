@@ -34,7 +34,10 @@ def login(village_name):
 @get('/api/')
 def get_api():
     global village
-    body = json.dumps(village)
+    village_names = []
+    for key in village.keys():
+        village_names.append(key)
+    body = json.dumps(village_names)
     r = HTTPResponse(status=200, body=body)
     r.set_header('Content-Type', 'application/json')
     return r
