@@ -45,7 +45,9 @@ def post_api():
     village_name = request.json.get("village_name")
     password = request.json.get("password")
     village[village_name] = password
-    r = HTTPResponse(status=200)
+    body = json.dumps({'village_name': village_name})
+    r = HTTPResponse(status=200, body=body)
+    r.set_header('Content-Type', 'application/json')
     return r
 
 @get('/api/<village_name:re:[0-9A-Za-z]*>/')

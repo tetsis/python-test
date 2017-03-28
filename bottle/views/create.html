@@ -19,6 +19,10 @@
     <script type="text/javascript">
         function afterPost(status, responseText) {
             console.log('status = ' + status);
+            console.log('responseText = ' + responseText);
+            data = JSON.parse(responseText);
+            console.log('data[village_name] = ' + data['village_name']);
+            window.location.href = '../' + data['village_name'] + '/login/';
         }
         document.getElementById('btn_create').addEventListener('click',
             function() {
