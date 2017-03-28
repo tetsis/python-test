@@ -23,6 +23,24 @@ def participate():
 def create():
     return dict(url=url)
 
+# 村のトップページ
+@route('/<village_name:re:[0-9A-Za-z]*>/')
+@view('village_index')
+def village_index():
+    global village
+
+    # 有効な村名かチェック
+    flag = False
+    for key in village.keys():
+        if village_name == key:
+            flag = True
+
+    if flag == True:
+        r = HTTPResponse(status=200)
+    else:
+        r = HTTPResponse(status=404)
+    return r
+
 # ログインページ
 @route('/<village_name:re:[0-9A-Za-z]*>/login/')
 @view('login')
