@@ -6,32 +6,38 @@
     </head>
     <body>
         <div class="form-group">
-        <label for="villageName">名前</label>
-        <input type="text" class="form-control" id="ipt_villageName" placeholder="Name">
+        <div id"villageName">{{village_name}}村<div>
+        <label for="name">名前</label>
+        <input type="text" class="form-control" id="name" placeholder="Name">
         </div>
         <div class="form-group">
         <label for="password">パスワード</label>
         <input type="password" class="form-control" id="ipt_password" placeholder="Password">
         </div>
-        <button type="button" class="btn btn-primary" id="btn_participate">ログイン</button>
+        <button type="button" class="btn btn-primary" id="btn_login">ログイン</button>
     </body>
     <script type="text/javascript" src="{{url('static_file', filepath='js/common.js')}}"></script>
     <script type="text/javascript">
-        function afterGet(status, response) {
-            //console.log(response['village_name']);
+        function afterPost(status, responseText) {
+            console.log('status = ' + status);
+            console.log('responseText = ' + responseText);
+            data = JSON.parse(responseText);
             let hostname = window.location.hostname;
             let port = window.location.port;
-            let villageName = response['village_name'];
             if (status == 200) {
-                window.location.href = 'http://' + hostname + ':' + port + '/' + villageName + '/login/';
             }
         }
-        document.getElementById('btn_participate').addEventListener('click',
+        document.getElementById('btn_login').addEventListener('click',
             function() {
                 let hostname = window.location.hostname;
                 let port = window.location.port;
-                let ipt_villageName = document.getElementById('ipt_villageName').value;
-                getFromAPI('http://' + hostname + ':' + port + '/api/' + ipt_villageName + '/', afterGet);
+                let ipt_name = document.getElementById('ipt_name').value;
+                let ipt_password = document.getElementById('ipt_password').value;
+                let data = {
+                    name: ipt_name,
+                    password: ipt_password
+                };
+                getFromAPI('http://' + hostname + ':' + port + '/api/' + {{village_name}} + '/player/', afterPost);
             }
             , false);
     </script>

@@ -35,7 +35,7 @@ def village_index():
         if village_name == key:
             flag = True
 
-    if flag == True:
+    if flag is True:
         r = HTTPResponse(status=200)
     else:
         r = HTTPResponse(status=404)
@@ -74,13 +74,14 @@ def post_api():
 @get('/api/<village_name:re:[0-9A-Za-z]*>/')
 def get_village(village_name):
     global village
+    data = {'village_name': village_name}
+    body = json.dumps(data)
     if village_name in village:
-        data = {'village_name': village_name}
-        body = json.dumps(data)
         r = HTTPResponse(status=200, body=body)
         r.set_header('Content-Type', 'application/json')
     else:
-        r = HTTPResponse(status=404)
+        r = HTTPResponse(status=404, body=body)
+        r.set_header('Content-Type', 'application/json')
     return r
 
 #### /API ####
@@ -133,4 +134,4 @@ def delete_resource():
 
 # ビルトインの開発用サーバーの起動
 # ここでは、debugとreloaderを有効にしている
-run(host='localhost', port=8080, debug=True, reloader=True)
+run(host='192.168.33.10', port=8080, debug=True, reloader=True)

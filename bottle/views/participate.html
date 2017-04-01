@@ -6,6 +6,7 @@
     </head>
     <body>
         <div class="form-group">
+        <div id="comment"></div>
         <label for="villageName">村の名前</label>
         <input type="text" class="form-control" id="ipt_villageName" placeholder="Village name">
         </div>
@@ -20,6 +21,9 @@
             let villageName = response['village_name'];
             if (status == 200) {
                 window.location.href = 'http://' + hostname + ':' + port + '/' + villageName + '/login/';
+            }
+            else if (status == 404) {
+                document.getElementById('comment').innerHTML = villageName + '村は存在しません。';
             }
         }
         document.getElementById('btn_participate').addEventListener('click',
