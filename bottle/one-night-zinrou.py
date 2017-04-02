@@ -114,4 +114,4 @@ def is_village(village_name):
 
 # ビルトインの開発用サーバーの起動
 # ここでは、debugとreloaderを有効にしている
-run(host='192.168.33.10', port=8080, debug=True, reloader=True)
+run(host='0.0.0.0', port=8080, debug=True, reloader=True)
