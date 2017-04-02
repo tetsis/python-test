@@ -8,7 +8,7 @@
         <div class="form-group">
         <div id"villageName">{{village_name}}村<div>
         <label for="name">名前</label>
-        <input type="text" class="form-control" id="name" placeholder="Name">
+        <input type="text" class="form-control" id="ipt_name" placeholder="Name">
         </div>
         <div class="form-group">
         <label for="password">パスワード</label>
@@ -21,11 +21,11 @@
         function afterPost(status, responseText) {
             console.log('status = ' + status);
             console.log('responseText = ' + responseText);
-            data = JSON.parse(responseText);
-            let hostname = window.location.hostname;
-            let port = window.location.port;
-            if (status == 200) {
-            }
+            //data = JSON.parse(responseText);
+            //let hostname = window.location.hostname;
+            //let port = window.location.port;
+            //if (status == 200) {
+            //}
         }
         document.getElementById('btn_login').addEventListener('click',
             function() {
@@ -37,7 +37,8 @@
                     name: ipt_name,
                     password: ipt_password
                 };
-                getFromAPI('http://' + hostname + ':' + port + '/api/' + {{village_name}} + '/player/', afterPost);
+                console.log(data);
+                postToAPI('http://' + hostname + ':' + port + '/api/{{village_name}}/player/', data, afterPost);
             }
             , false);
     </script>
