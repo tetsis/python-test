@@ -5,6 +5,7 @@
         <title>村を作成 - ワンナイト人狼</title>
     </head>
     <body>
+        <div id="comment"></div>
         <div class="form-group">
         <label for="villageName">村の名前</label>
         <input type="text" class="form-control" id="ipt_villageName" placeholder="Village name">
@@ -22,7 +23,12 @@
             console.log('responseText = ' + responseText);
             data = JSON.parse(responseText);
             console.log('data[village_name] = ' + data['village_name']);
-            window.location.href = '../' + data['village_name'] + '/login/';
+            if (status == 200) {
+                window.location.href = '../' + data['village_name'] + '/login/';
+            }
+            else if (status == 400) {
+                document.getElementById('comment').innerHTML = '同じ名前の村が既に存在しています。';
+            }
         }
         document.getElementById('btn_create').addEventListener('click',
             function() {

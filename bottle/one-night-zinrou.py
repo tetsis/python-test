@@ -1,5 +1,6 @@
 from bottle import route, run, template, get, post, put, delete, request, view, HTTPResponse, static_file, url
 import json
+import requests
 
 village = {}
 
@@ -62,14 +63,43 @@ def get_api():
 
 @post('/api/')
 def post_api():
+    print('ENTER: post_api')
     global village
     print(request.json)
     village_name = request.json.get("village_name")
     password = request.json.get("password")
-    village[village_name] = {'password': password, 'player': {}}
-    print(village)
     body = json.dumps({'village_name': village_name})
-    r = HTTPResponse(status=200, body=body)
+
+    flag = is_village(village_name)
+    if flag is False:
+        village[village_name] = {'password': password, 'player': {}}
+        r = HTTPResponse(status=200, body=body)
+        r.set_cookie('village_id', '10')
+    else:
+        r = HTTPResponse(status=400, body=body)
+
+    r.set_header('Content-Type', 'application/json')
+    return r
+
+@post('/api/participate/')
+def post_api_participate():
+    print('ENTER: post_api_participate')
+    global village
+    print(request.json)
+    village_name = request.json.get("village_name")
+    password = request.json.get("password")
+    body = json.dumps({'village_name': village_name})
+
+    flag = is_village(village_name)
+    if flag is True:
+        password_flag = check_village_password(village_name, password)
+        if password_flag is True:
+            r = HTTPResponse(status=200, body=body)
+        else:
+            r = HTTPResponse(status=403, body=body)
+    else:
+        r = HTTPResponse(status=404, body=body)
+
     r.set_header('Content-Type', 'application/json')
     return r
 
@@ -80,10 +110,10 @@ def get_village(village_name):
     body = json.dumps(data)
     if flag is True:
         r = HTTPResponse(status=200, body=body)
-        r.set_header('Content-Type', 'application/json')
     else:
         r = HTTPResponse(status=404, body=body)
-        r.set_header('Content-Type', 'application/json')
+
+    r.set_header('Content-Type', 'application/json')
     return r
 
 @post('/api/<village_name:re:[0-9A-Za-z]*>/player/')
@@ -112,6 +142,17 @@ def is_village(village_name):
         flag = True
     return flag
 
+def check_village_password(village_name, password):
+    global village
+    flag = is_village(village_name)
+    if flag is True:
+        if village[village_name]['password'] == password:
+            return True
+    return False
+
 # ビルトインの開発用サーバーの起動
 # ここでは、debugとreloaderを有効にしている
-run(host='0.0.0.0', port=8080, debug=True, reloader=True)
+if __name__ == '__main__':
+    run(host='192.168.33.254', port=8080, debug=True, reloader=True)
+else:
+    application = default_app()

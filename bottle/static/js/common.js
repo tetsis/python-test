@@ -27,6 +27,8 @@ function postToAPI(api, data, afterFunction) {
         if (xhr.readyState === 4) {
             //console.log(xhr.status);
             //console.log(xhr.responseText);
+            //header = xhr.getResponseHeader("Content-Type");
+            //console.log(header);
             afterFunction(xhr.status, xhr.responseText);
         }
     }

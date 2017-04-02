@@ -5,8 +5,8 @@
         <title>村に参加 - ワンナイト人狼</title>
     </head>
     <body>
-        <div class="form-group">
         <div id="comment"></div>
+        <div class="form-group">
         <label for="villageName">村の名前</label>
         <input type="text" class="form-control" id="ipt_villageName" placeholder="Village name">
         </div>
@@ -18,16 +18,19 @@
     </body>
     <script type="text/javascript" src="{{url('static_file', filepath='js/common.js')}}"></script>
     <script type="text/javascript">
-        function afterGet(status, response) {
-            //console.log(response['village_name']);
-            let hostname = window.location.hostname;
-            let port = window.location.port;
-            let villageName = response['village_name'];
+        function afterPost(status, responseText) {
+            console.log('status = ' + status);
+            console.log('responseText = ' + responseText);
+            data = JSON.parse(responseText);
+            console.log('data[village_name] = ' + data['village_name']);
             if (status == 200) {
-                window.location.href = 'http://' + hostname + ':' + port + '/' + villageName + '/login/';
+                window.location.href = '../' + data['village_name'] + '/login/';
+            }
+            else if (status == 403) {
+                document.getElementById('comment').innerHTML = 'パスワードが正しくありません。';
             }
             else if (status == 404) {
-                document.getElementById('comment').innerHTML = villageName + '村は存在しません。';
+                document.getElementById('comment').innerHTML = data['village_name'] + '村は存在しません。';
             }
         }
         document.getElementById('btn_participate').addEventListener('click',
@@ -41,7 +44,7 @@
                     password: ipt_password
                 };
                 console.log(data);
-                getFromAPI('http://' + hostname + ':' + port + '/api/' + ipt_villageName + '/', afterGet);
+                postToAPI('http://' + hostname + ':' + port + '/api/participate/', data, afterPost);
             }
             , false);
     </script>
