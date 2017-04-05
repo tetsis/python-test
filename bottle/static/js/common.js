@@ -25,9 +25,9 @@ function postToAPI(api, data, afterFunction) {
     //xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
     xhr.onreadystatechange = function(event) {
         if (xhr.readyState === 4) {
-            //console.log(xhr.status);
-            //console.log(xhr.responseText);
-            //header = xhr.getResponseHeader("Content-Type");
+            console.log(xhr.status);
+            console.log(xhr.responseText);
+            //header = xhr.getResponseHeader("Set-Cookie");
             //console.log(header);
             afterFunction(xhr.status, xhr.responseText);
         }

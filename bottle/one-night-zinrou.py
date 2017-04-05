@@ -27,20 +27,8 @@ def create():
 # 村のトップページ
 @route('/<village_name:re:[0-9A-Za-z]*>/')
 @view('village_index')
-def village_index():
-    global village
-
-    # 有効な村名かチェック
-    flag = False
-    for key in village.keys():
-        if village_name == key:
-            flag = True
-
-    if flag is True:
-        r = HTTPResponse(status=200)
-    else:
-        r = HTTPResponse(status=404)
-    return r
+def village_index(village_name):
+    return dict(url=url, village_name=village_name)
 
 # ログインページ
 @route('/<village_name:re:[0-9A-Za-z]*>/login/')
@@ -68,13 +56,12 @@ def post_api():
     print(request.json)
     village_name = request.json.get("village_name")
     password = request.json.get("password")
-    body = json.dumps({'village_name': village_name})
+    body = json.dumps({'village_name': village_name, 'session_id': 1})
 
     flag = is_village(village_name)
     if flag is False:
         village[village_name] = {'password': password, 'player': {}}
         r = HTTPResponse(status=200, body=body)
-        r.set_cookie('village_id', '10')
     else:
         r = HTTPResponse(status=400, body=body)
 
@@ -88,7 +75,7 @@ def post_api_participate():
     print(request.json)
     village_name = request.json.get("village_name")
     password = request.json.get("password")
-    body = json.dumps({'village_name': village_name})
+    body = json.dumps({'village_name': village_name, 'session_id': 2})
 
     flag = is_village(village_name)
     if flag is True:
@@ -122,12 +109,20 @@ def post_player(village_name):
     print(request.json)
     name = request.json.get("name")
     password = request.json.get("password")
+    data = {'village_name': village_name, 'name': name}
+    body = json.dumps(data)
     flag = is_village(village_name)
     if flag is True:
         player = {}
         player[name] = {'password': password}
         village[village_name]['player'].update(player)
         print(village)
+        r = HTTPResponse(status=200, body=body)
+    else:
+        r = HTTPResponse(status=404, body=body)
+
+    r.set_header('Content-Type', 'application/json')
+    return r
 
 #### /API ####
 
@@ -153,6 +148,7 @@ def check_village_password(village_name, password):
 # ビルトインの開発用サーバーの起動
 # ここでは、debugとreloaderを有効にしている
 if __name__ == '__main__':
-    run(host='192.168.33.254', port=8080, debug=True, reloader=True)
+    #run(host='192.168.33.254', port=8080, debug=True, reloader=True)
+    run(host='0.0.0.0', port=8080, debug=True, reloader=True)
 else:
     application = default_app()
