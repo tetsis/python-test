@@ -2,19 +2,20 @@
 <html lang="ja">
     <head>
         <meta charset="utf-8">
-        <title>村を作成 - ワンナイト人狼</title>
+        <title>登録 - {{village_name}}村</title>
     </head>
     <body>
         <div id="comment"></div>
         <div class="form-group">
-        <label for="villageName">村の名前</label>
-        <input type="text" class="form-control" id="ipt_villageName" placeholder="Village name">
+        <div id"villageName">{{village_name}}村<div>
+        <label for="name">名前</label>
+        <input type="text" class="form-control" id="ipt_name" placeholder="Name">
         </div>
         <div class="form-group">
         <label for="password">パスワード</label>
         <input type="password" class="form-control" id="ipt_password" placeholder="Password">
         </div>
-        <button type="button" class="btn btn-primary" id="btn_create">作成</button>
+        <button type="button" class="btn btn-primary" id="btn_join">登録</button>
     </body>
     <script type="text/javascript" src="{{url('static_file', filepath='js/common.js')}}"></script>
     <script type="text/javascript">
@@ -22,28 +23,29 @@
             console.log('status = ' + status);
             console.log('responseText = ' + responseText);
             data = JSON.parse(responseText);
-            console.log('data[village_name] = ' + data['village_name']);
             if (status == 200) {
-                window.location.href = '../' + data['village_name'] + '/';
+                window.location.href = '../room/';
             }
             else if (status == 409) {
-                document.getElementById('comment').innerHTML = '同じ名前の村が既に存在しています。';
+                document.getElementById('comment').innerHTML = '同じ名前のプレイヤーが既に存在しています。';
+            }
+            else if (status == 404) {
+                document.getElementById('comment').innerHTML = data['village_name'] + '村は存在しません。';
             }
         }
-        document.getElementById('btn_create').addEventListener('click',
+        document.getElementById('btn_join').addEventListener('click',
             function() {
                 let hostname = window.location.hostname;
                 let port = window.location.port;
-                let ipt_villageName = document.getElementById('ipt_villageName').value;
+                let ipt_name = document.getElementById('ipt_name').value;
                 let ipt_password = document.getElementById('ipt_password').value;
                 let data = {
-                    village_name: ipt_villageName,
+                    name: ipt_name,
                     password: ipt_password
                 };
                 console.log(data);
-                postToAPI('http://' + hostname + ':' + port + '/api/', data, afterPost);
+                postToAPI('http://' + hostname + ':' + port + '/api/{{village_name}}/join/', data, afterPost);
             }
             , false);
-
     </script>
 </html>

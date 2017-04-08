@@ -2,11 +2,26 @@
 <html lang="ja">
     <head>
         <meta charset="utf-8">
-        <title>ワンナイト人狼</title>
+        <title>{{village_name}}村 - ワンナイト人狼</title>
     </head>
     <body>
+        <div>
         {{village_name}}
+        </div>
+        <button type="button" class="btn btn-primary" id="btn_join">新規登録</button>
+        <button type="button" class="btn btn-primary" id="btn_login">ログイン</button>
     </body>
     <script type="text/javascript">
+        document.getElementById('btn_join').addEventListener('click',
+            function() {
+                window.location.href = 'join/';
+            }
+            , false);
+
+        document.getElementById('btn_login').addEventListener('click',
+            function() {
+                window.location.href = 'login/';
+            }
+        , false);
     </script>
 </html>

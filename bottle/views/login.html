@@ -24,10 +24,16 @@
             console.log('responseText = ' + responseText);
             data = JSON.parse(responseText);
             if (status == 200) {
-                window.location.href = '../';
+                window.location.href = '../room/';
+            }
+            else if (status == 403) {
+                document.getElementById('comment').innerHTML = 'パスワードが正しくありません。';
             }
             else if (status == 400) {
-                document.getElementById('comment').innerHTML = '同じ名前のプレイヤーが既に存在しています。';
+                document.getElementById('comment').innerHTML = data['name'] + 'はプレイヤー登録されていません。';
+            }
+            else if (status == 404) {
+                document.getElementById('comment').innerHTML = data['village_name'] + '村は存在しません。';
             }
         }
         document.getElementById('btn_login').addEventListener('click',
@@ -41,7 +47,7 @@
                     password: ipt_password
                 };
                 console.log(data);
-                postToAPI('http://' + hostname + ':' + port + '/api/{{village_name}}/player/', data, afterPost);
+                postToAPI('http://' + hostname + ':' + port + '/api/{{village_name}}/login/', data, afterPost);
             }
             , false);
     </script>

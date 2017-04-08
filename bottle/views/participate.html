@@ -24,7 +24,7 @@
             data = JSON.parse(responseText);
             console.log('data[village_name] = ' + data['village_name']);
             if (status == 200) {
-                window.location.href = '../' + data['village_name'] + '/login/';
+                window.location.href = '../' + data['village_name'] + '/';
             }
             else if (status == 403) {
                 document.getElementById('comment').innerHTML = 'パスワードが正しくありません。';

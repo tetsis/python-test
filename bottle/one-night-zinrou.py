@@ -35,6 +35,19 @@ def village_index(village_name):
 @view('login')
 def login(village_name):
     return dict(url=url, village_name=village_name)
+
+# 新規登録ページ
+@route('/<village_name:re:[0-9A-Za-z]*>/join/')
+@view('join')
+def join(village_name):
+    return dict(url=url, village_name=village_name)
+
+# 村の部屋ページ
+@route('/<village_name:re:[0-9A-Za-z]*>/room/')
+@view('room')
+def room(village_name):
+    return dict(url=url, village_name=village_name)
+
 #### /views ####
 
 #### API ####
@@ -63,7 +76,7 @@ def post_api():
         village[village_name] = {'password': password, 'player': {}}
         r = HTTPResponse(status=200, body=body)
     else:
-        r = HTTPResponse(status=400, body=body)
+        r = HTTPResponse(status=409, body=body)
 
     r.set_header('Content-Type', 'application/json')
     return r
@@ -103,8 +116,8 @@ def get_village(village_name):
     r.set_header('Content-Type', 'application/json')
     return r
 
-@post('/api/<village_name:re:[0-9A-Za-z]*>/player/')
-def post_player(village_name):
+@post('/api/<village_name:re:[0-9A-Za-z]*>/login/')
+def post_login(village_name):
     global village
     print(request.json)
     name = request.json.get("name")
@@ -113,11 +126,40 @@ def post_player(village_name):
     body = json.dumps(data)
     flag = is_village(village_name)
     if flag is True:
-        player = {}
-        player[name] = {'password': password}
-        village[village_name]['player'].update(player)
-        print(village)
-        r = HTTPResponse(status=200, body=body)
+        player_flag = is_player(village_name, name)
+        if player_flag is True:
+            password_flag = check_player_password(village_name, name, password)
+            if password_flag is True:
+                r = HTTPResponse(status=200, body=body)
+            else:
+                r = HTTPResponse(status=403, body=body)
+        else:
+            r = HTTPResponse(status=400, body=body)
+    else:
+        r = HTTPResponse(status=404, body=body)
+
+    r.set_header('Content-Type', 'application/json')
+    return r
+
+@post('/api/<village_name:re:[0-9A-Za-z]*>/join/')
+def post_login(village_name):
+    global village
+    print(request.json)
+    name = request.json.get("name")
+    password = request.json.get("password")
+    data = {'village_name': village_name, 'name': name}
+    body = json.dumps(data)
+    flag = is_village(village_name)
+    if flag is True:
+        player_flag = is_player(village_name, name)
+        if player_flag is False:
+            player = {}
+            player[name] = {'password': password}
+            village[village_name]['player'].update(player)
+            print(village)
+            r = HTTPResponse(status=200, body=body)
+        else:
+            r = HTTPResponse(status=409, body=body)
     else:
         r = HTTPResponse(status=404, body=body)
 
@@ -143,6 +185,24 @@ def check_village_password(village_name, password):
     if flag is True:
         if village[village_name]['password'] == password:
             return True
+    return False
+
+def is_player(village_name, player_name):
+    global village
+    flag = is_village(village_name)
+    if flag is True:
+        if player_name in village[village_name]['player']:
+            return True
+    return False
+
+def check_player_password(village_name, player_name, password):
+    global village
+    flag = is_village(village_name)
+    if flag is True:
+        player_flag = is_player(village_name, player_name)
+        if player_flag is True:
+            if village[village_name]['player'][player_name]['password'] == password:
+                return True
     return False
 
 # ビルトインの開発用サーバーの起動
