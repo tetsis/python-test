@@ -158,6 +158,14 @@ def delete_logout(village_name, player_name):
             dict_cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
             dict_cur.execute("delete from player where (name)=(%s)", (player_name,))
             conn.commit()
+            dict_cur.execute("select name from player where (village_name)=(%s)", (village_name,))
+            i = 0
+            for row in dict_cur:
+                i += 1
+            if i == 0:
+                # プレイヤーが皆ログアウトしたら村を消す
+                dict_cur.execute("delete from village where (name)=(%s)", (village_name,))
+                conn.commit()
             dict_cur.close()
             conn.close()
             r = HTTPResponse(status=200)
@@ -171,8 +179,6 @@ def delete_logout(village_name, player_name):
 
 @post('/api/<village_name:re:[0-9A-Za-z]*>/login/')
 def post_login(village_name):
-    global village
-    print(request.json)
     player_name = request.json.get("player_name")
     password = request.json.get("password")
     data = {'village_name': village_name, 'player_name': player_name}
