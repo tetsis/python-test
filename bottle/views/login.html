@@ -24,7 +24,7 @@
             console.log('responseText = ' + responseText);
             data = JSON.parse(responseText);
             if (status == 200) {
-                window.location.href = '../' + data['player_name'] + '/';
+                window.location.href = '../room/';
             }
             else if (status == 403) {
                 document.getElementById('comment').innerHTML = 'パスワードが正しくありません。';

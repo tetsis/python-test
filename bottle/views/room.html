@@ -6,26 +6,10 @@
     </head>
     <body>
         <div>
-        {{village_name}}
-
-        {{player_name}}
+        {{village_name}}村
         </div>
-        <button type="button" class="btn btn-primary" id="btn_logout">ログアウト</button>
     </body>
     <script type="text/javascript" src="{{url('static_file', filepath='js/common.js')}}"></script>
     <script type="text/javascript">
-        function afterDelete(status) {
-            console.log('status = ' + status);
-            if (status == 200) {
-                window.location.href = '../../';
-            }
-        }
-        document.getElementById('btn_logout').addEventListener('click',
-            function() {
-                let hostname = window.location.hostname;
-                let port = window.location.port;
-                deleteFromAPI('http://' + hostname + ':' + port + '/api/{{village_name}}/{{player_name}}/', afterDelete);
-            }
-        , false);
     </script>
 </html>

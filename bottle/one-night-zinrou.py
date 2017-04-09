@@ -43,10 +43,16 @@ def login(village_name):
 def join(village_name):
     return dict(url=url, village_name=village_name)
 
-# 村の個人ページ
-@route('/<village_name:re:[0-9A-Za-z]*>/<player_name:re:[0-9A-Za-z]*>/')
+# 村の部屋ページ
+@route('/<village_name:re:[0-9A-Za-z]*>/room/')
 @view('room')
-def room(village_name, player_name):
+def room(village_name):
+    return dict(url=url, village_name=village_name)
+
+# 村の個人ページ
+@route('/<village_name:re:[0-9A-Za-z]*>/player/<player_name:re:[0-9A-Za-z]*>/')
+@view('player')
+def player(village_name, player_name):
     return dict(url=url, village_name=village_name, player_name=player_name)
 
 #### /views ####
