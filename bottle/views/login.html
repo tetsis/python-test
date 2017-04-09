@@ -9,7 +9,7 @@
         <div class="form-group">
         <div id"villageName">{{village_name}}村<div>
         <label for="name">名前</label>
-        <input type="text" class="form-control" id="ipt_name" placeholder="Name">
+        <input type="text" class="form-control" id="ipt_playerName" placeholder="Name">
         </div>
         <div class="form-group">
         <label for="password">パスワード</label>
@@ -40,10 +40,10 @@
             function() {
                 let hostname = window.location.hostname;
                 let port = window.location.port;
-                let ipt_name = document.getElementById('ipt_name').value;
+                let ipt_playerName = document.getElementById('ipt_playerName').value;
                 let ipt_password = document.getElementById('ipt_password').value;
                 let data = {
-                    name: ipt_name,
+                    player_name: ipt_playerName,
                     password: ipt_password
                 };
                 console.log(data);

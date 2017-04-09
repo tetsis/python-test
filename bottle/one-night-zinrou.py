@@ -1,6 +1,7 @@
 from bottle import route, run, template, get, post, put, delete, request, view, HTTPResponse, static_file, url
 import json
 import requests
+import psycopg2.extras
 
 village = {}
 
@@ -73,7 +74,12 @@ def post_api():
 
     flag = is_village(village_name)
     if flag is False:
-        village[village_name] = {'password': password, 'player': {}}
+        conn = psycopg2.connect("host=127.0.0.1 port=5432 dbname=one_night_zinrou user=one_night_zinrou password=one_night_zinrou")
+        dict_cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        dict_cur.execute("insert into village (name, password) values (%s, %s)", (village_name, password))
+        conn.commit()
+        dict_cur.close()
+        conn.close()
         r = HTTPResponse(status=200, body=body)
     else:
         r = HTTPResponse(status=409, body=body)
@@ -118,20 +124,21 @@ def get_village(village_name):
 
 @post('/api/<village_name:re:[0-9A-Za-z]*>/')
 def post_village(village_name):
-    global village
     print(request.json)
-    name = request.json.get("name")
+    player_name = request.json.get("player_name")
     password = request.json.get("password")
-    data = {'village_name': village_name, 'player_name': name}
+    data = {'village_name': village_name, 'player_name': player_name}
     body = json.dumps(data)
     flag = is_village(village_name)
     if flag is True:
-        player_flag = is_player(village_name, name)
+        player_flag = is_player(village_name, player_name)
         if player_flag is False:
-            player = {}
-            player[name] = {'password': password}
-            village[village_name]['player'].update(player)
-            print(village)
+            conn = psycopg2.connect("host=127.0.0.1 port=5432 dbname=one_night_zinrou user=one_night_zinrou password=one_night_zinrou")
+            dict_cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+            dict_cur.execute("insert into player (name, password, village_name) values (%s, %s, %s)", (player_name, password, village_name))
+            conn.commit()
+            dict_cur.close()
+            conn.close()
             r = HTTPResponse(status=200, body=body)
         else:
             r = HTTPResponse(status=409, body=body)
@@ -143,13 +150,16 @@ def post_village(village_name):
 
 @delete('/api/<village_name:re:[0-9A-Za-z]*>/<player_name:re:[0-9A-Za-z]*>/')
 def delete_logout(village_name, player_name):
-    global village
     flag = is_village(village_name)
     if flag is True:
         player_flag = is_player(village_name, player_name)
         if player_flag is True:
-            village[village_name]['player'].pop(player_name)
-            print(village)
+            conn = psycopg2.connect("host=127.0.0.1 port=5432 dbname=one_night_zinrou user=one_night_zinrou password=one_night_zinrou")
+            dict_cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+            dict_cur.execute("delete from player where (name)=(%s)", (player_name,))
+            conn.commit()
+            dict_cur.close()
+            conn.close()
             r = HTTPResponse(status=200)
         else:
             r = HTTPResponse(status=404)
@@ -163,15 +173,15 @@ def delete_logout(village_name, player_name):
 def post_login(village_name):
     global village
     print(request.json)
-    name = request.json.get("name")
+    player_name = request.json.get("player_name")
     password = request.json.get("password")
-    data = {'village_name': village_name, 'player_name': name}
+    data = {'village_name': village_name, 'player_name': player_name}
     body = json.dumps(data)
     flag = is_village(village_name)
     if flag is True:
-        player_flag = is_player(village_name, name)
+        player_flag = is_player(village_name, player_name)
         if player_flag is True:
-            password_flag = check_player_password(village_name, name, password)
+            password_flag = check_player_password(village_name, player_name, password)
             if password_flag is True:
                 r = HTTPResponse(status=200, body=body)
             else:
@@ -191,37 +201,60 @@ def static(filepath):
     return static_file(filepath, root="./static")
 
 def is_village(village_name):
-    global village
+    conn = psycopg2.connect("host=127.0.0.1 port=5432 dbname=one_night_zinrou user=one_night_zinrou password=one_night_zinrou")
+    dict_cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    dict_cur.execute("select name from village")
     flag = False
-    if village_name in village:
-        flag = True
+    for row in dict_cur:
+        if row['name'] == village_name:
+            flag = True
+            break
+    dict_cur.close()
+    conn.close()
+
     return flag
 
 def check_village_password(village_name, password):
-    global village
-    flag = is_village(village_name)
-    if flag is True:
-        if village[village_name]['password'] == password:
-            return True
-    return False
+    conn = psycopg2.connect("host=127.0.0.1 port=5432 dbname=one_night_zinrou user=one_night_zinrou password=one_night_zinrou")
+    dict_cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    dict_cur.execute("select password from village where (name)=(%s)", (village_name,))
+    flag = False
+    for row in dict_cur:
+        if row['password'] == password:
+            flag = True
+            break
+    dict_cur.close()
+    conn.close()
+
+    return flag
 
 def is_player(village_name, player_name):
-    global village
-    flag = is_village(village_name)
-    if flag is True:
-        if player_name in village[village_name]['player']:
-            return True
-    return False
+    conn = psycopg2.connect("host=127.0.0.1 port=5432 dbname=one_night_zinrou user=one_night_zinrou password=one_night_zinrou")
+    dict_cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    dict_cur.execute("select name from player where (village_name)=(%s)", (village_name,))
+    flag = False
+    for row in dict_cur:
+        if row['name'] == player_name:
+            flag = True
+            break
+    dict_cur.close()
+    conn.close()
+
+    return flag
 
 def check_player_password(village_name, player_name, password):
-    global village
-    flag = is_village(village_name)
-    if flag is True:
-        player_flag = is_player(village_name, player_name)
-        if player_flag is True:
-            if village[village_name]['player'][player_name]['password'] == password:
-                return True
-    return False
+    conn = psycopg2.connect("host=127.0.0.1 port=5432 dbname=one_night_zinrou user=one_night_zinrou password=one_night_zinrou")
+    dict_cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    dict_cur.execute("select password from player where (village_name)=(%s) and (name)=(%s)", (village_name, player_name))
+    flag = False
+    for row in dict_cur:
+        if row['password'] == password:
+            flag = True
+            break
+    dict_cur.close()
+    conn.close()
+
+    return flag
 
 # ビルトインの開発用サーバーの起動
 # ここでは、debugとreloaderを有効にしている
