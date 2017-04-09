@@ -42,11 +42,11 @@ def login(village_name):
 def join(village_name):
     return dict(url=url, village_name=village_name)
 
-# 村の部屋ページ
-@route('/<village_name:re:[0-9A-Za-z]*>/room/')
+# 村の個人ページ
+@route('/<village_name:re:[0-9A-Za-z]*>/<player_name:re:[0-9A-Za-z]*>/')
 @view('room')
-def room(village_name):
-    return dict(url=url, village_name=village_name)
+def room(village_name, player_name):
+    return dict(url=url, village_name=village_name, player_name=player_name)
 
 #### /views ####
 
@@ -116,38 +116,13 @@ def get_village(village_name):
     r.set_header('Content-Type', 'application/json')
     return r
 
-@post('/api/<village_name:re:[0-9A-Za-z]*>/login/')
-def post_login(village_name):
+@post('/api/<village_name:re:[0-9A-Za-z]*>/')
+def post_village(village_name):
     global village
     print(request.json)
     name = request.json.get("name")
     password = request.json.get("password")
-    data = {'village_name': village_name, 'name': name}
-    body = json.dumps(data)
-    flag = is_village(village_name)
-    if flag is True:
-        player_flag = is_player(village_name, name)
-        if player_flag is True:
-            password_flag = check_player_password(village_name, name, password)
-            if password_flag is True:
-                r = HTTPResponse(status=200, body=body)
-            else:
-                r = HTTPResponse(status=403, body=body)
-        else:
-            r = HTTPResponse(status=400, body=body)
-    else:
-        r = HTTPResponse(status=404, body=body)
-
-    r.set_header('Content-Type', 'application/json')
-    return r
-
-@post('/api/<village_name:re:[0-9A-Za-z]*>/join/')
-def post_login(village_name):
-    global village
-    print(request.json)
-    name = request.json.get("name")
-    password = request.json.get("password")
-    data = {'village_name': village_name, 'name': name}
+    data = {'village_name': village_name, 'player_name': name}
     body = json.dumps(data)
     flag = is_village(village_name)
     if flag is True:
@@ -160,6 +135,49 @@ def post_login(village_name):
             r = HTTPResponse(status=200, body=body)
         else:
             r = HTTPResponse(status=409, body=body)
+    else:
+        r = HTTPResponse(status=404, body=body)
+
+    r.set_header('Content-Type', 'application/json')
+    return r
+
+@delete('/api/<village_name:re:[0-9A-Za-z]*>/<player_name:re:[0-9A-Za-z]*>/')
+def delete_logout(village_name, player_name):
+    global village
+    flag = is_village(village_name)
+    if flag is True:
+        player_flag = is_player(village_name, player_name)
+        if player_flag is True:
+            village[village_name]['player'].pop(player_name)
+            print(village)
+            r = HTTPResponse(status=200)
+        else:
+            r = HTTPResponse(status=404)
+    else:
+        r = HTTPResponse(status=404)
+
+    r.set_header('Content-Type', 'application/json')
+    return r
+
+@post('/api/<village_name:re:[0-9A-Za-z]*>/login/')
+def post_login(village_name):
+    global village
+    print(request.json)
+    name = request.json.get("name")
+    password = request.json.get("password")
+    data = {'village_name': village_name, 'player_name': name}
+    body = json.dumps(data)
+    flag = is_village(village_name)
+    if flag is True:
+        player_flag = is_player(village_name, name)
+        if player_flag is True:
+            password_flag = check_player_password(village_name, name, password)
+            if password_flag is True:
+                r = HTTPResponse(status=200, body=body)
+            else:
+                r = HTTPResponse(status=403, body=body)
+        else:
+            r = HTTPResponse(status=400, body=body)
     else:
         r = HTTPResponse(status=404, body=body)
 

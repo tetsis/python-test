@@ -24,7 +24,7 @@
             console.log('responseText = ' + responseText);
             data = JSON.parse(responseText);
             if (status == 200) {
-                window.location.href = '../room/';
+                window.location.href = '../' + data['player_name'] + '/';
             }
             else if (status == 409) {
                 document.getElementById('comment').innerHTML = '同じ名前のプレイヤーが既に存在しています。';
@@ -44,7 +44,7 @@
                     password: ipt_password
                 };
                 console.log(data);
-                postToAPI('http://' + hostname + ':' + port + '/api/{{village_name}}/join/', data, afterPost);
+                postToAPI('http://' + hostname + ':' + port + '/api/{{village_name}}/', data, afterPost);
             }
             , false);
     </script>

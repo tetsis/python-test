@@ -24,13 +24,13 @@
             console.log('responseText = ' + responseText);
             data = JSON.parse(responseText);
             if (status == 200) {
-                window.location.href = '../room/';
+                window.location.href = '../' + data['player_name'] + '/';
             }
             else if (status == 403) {
                 document.getElementById('comment').innerHTML = 'パスワードが正しくありません。';
             }
             else if (status == 400) {
-                document.getElementById('comment').innerHTML = data['name'] + 'はプレイヤー登録されていません。';
+                document.getElementById('comment').innerHTML = data['player_name'] + 'はプレイヤー登録されていません。';
             }
             else if (status == 404) {
                 document.getElementById('comment').innerHTML = data['village_name'] + '村は存在しません。';

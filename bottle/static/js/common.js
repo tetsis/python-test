@@ -35,6 +35,20 @@ function postToAPI(api, data, afterFunction) {
     xhr.send(data);
 }
 
+//DELETE
+function deleteFromAPI(api, afterFunction) {
+    let url = api;
+    let xhr = XMLHttpRequestCreate();
+    xhr.open("DELETE", url);
+    xhr.onreadystatechange = function(event) {
+        if (xhr.readyState === 4) {
+            console.log(xhr.status);
+            afterFunction(xhr.status);
+        }
+    }
+    xhr.send();
+}
+
 function XMLHttpRequestCreate(){
     try {
         return new XMLHttpRequest();
