@@ -133,7 +133,7 @@ def post_village(village_name):
     print(request.json)
     player_name = request.json.get("player_name")
     password = request.json.get("password")
-    data = {'village_name': village_name, 'player_name': player_name}
+    data = {'village_name': village_name, 'player_name': player_name, 'session_id': 1}
     body = json.dumps(data)
     flag = is_village(village_name)
     if flag is True:
@@ -187,7 +187,7 @@ def delete_logout(village_name, player_name):
 def post_login(village_name):
     player_name = request.json.get("player_name")
     password = request.json.get("password")
-    data = {'village_name': village_name, 'player_name': player_name}
+    data = {'village_name': village_name, 'player_name': player_name, 'session_id': 1}
     body = json.dumps(data)
     flag = is_village(village_name)
     if flag is True:
