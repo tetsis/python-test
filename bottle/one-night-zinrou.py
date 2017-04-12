@@ -76,7 +76,7 @@ def post_api():
     print(request.json)
     village_name = request.json.get("village_name")
     password = request.json.get("password")
-    body = json.dumps({'village_name': village_name, 'session_id': 1})
+    data = {'village_name': village_name}
 
     flag = is_village(village_name)
     if flag is False:
@@ -86,10 +86,12 @@ def post_api():
         conn.commit()
         dict_cur.close()
         conn.close()
-        r = HTTPResponse(status=200, body=body)
+        status = 200
     else:
-        r = HTTPResponse(status=409, body=body)
+        status = 409
 
+    body = json.dumps(data)
+    r = HTTPResponse(status=status, body=body)
     r.set_header('Content-Type', 'application/json')
     return r
 
@@ -100,18 +102,20 @@ def post_api_participate():
     print(request.json)
     village_name = request.json.get("village_name")
     password = request.json.get("password")
-    body = json.dumps({'village_name': village_name, 'session_id': 2})
+    data = {'village_name': village_name}
 
     flag = is_village(village_name)
     if flag is True:
         password_flag = check_village_password(village_name, password)
         if password_flag is True:
-            r = HTTPResponse(status=200, body=body)
+            status = 200
         else:
-            r = HTTPResponse(status=403, body=body)
+            status = 403
     else:
-        r = HTTPResponse(status=404, body=body)
+        status = 404
 
+    body = json.dumps(data)
+    r = HTTPResponse(status=status, body=body)
     r.set_header('Content-Type', 'application/json')
     return r
 
@@ -119,12 +123,13 @@ def post_api_participate():
 def get_village(village_name):
     flag = is_village(village_name)
     data = {'village_name': village_name}
-    body = json.dumps(data)
     if flag is True:
-        r = HTTPResponse(status=200, body=body)
+        status = 200
     else:
-        r = HTTPResponse(status=404, body=body)
+        status = 404
 
+    body = json.dumps(data)
+    r = HTTPResponse(status=status, body=body)
     r.set_header('Content-Type', 'application/json')
     return r
 
@@ -133,8 +138,7 @@ def post_village(village_name):
     print(request.json)
     player_name = request.json.get("player_name")
     password = request.json.get("password")
-    data = {'village_name': village_name, 'player_name': player_name, 'session_id': 1}
-    body = json.dumps(data)
+    data = {'village_name': village_name, 'player_name': player_name}
     flag = is_village(village_name)
     if flag is True:
         player_flag = is_player(village_name, player_name)
@@ -145,12 +149,14 @@ def post_village(village_name):
             conn.commit()
             dict_cur.close()
             conn.close()
-            r = HTTPResponse(status=200, body=body)
+            status = 200
         else:
-            r = HTTPResponse(status=409, body=body)
+            status = 409
     else:
-        r = HTTPResponse(status=404, body=body)
+        status = 404
 
+    body = json.dumps(data)
+    r = HTTPResponse(status=status, body=body)
     r.set_header('Content-Type', 'application/json')
     return r
 
@@ -174,12 +180,13 @@ def delete_logout(village_name, player_name):
                 conn.commit()
             dict_cur.close()
             conn.close()
-            r = HTTPResponse(status=200)
+            status = 200
         else:
-            r = HTTPResponse(status=404)
+            status = 404
     else:
-        r = HTTPResponse(status=404)
+        status = 404
 
+    r = HTTPResponse(status=status)
     r.set_header('Content-Type', 'application/json')
     return r
 
@@ -187,22 +194,24 @@ def delete_logout(village_name, player_name):
 def post_login(village_name):
     player_name = request.json.get("player_name")
     password = request.json.get("password")
-    data = {'village_name': village_name, 'player_name': player_name, 'session_id': 1}
-    body = json.dumps(data)
+    data = {'village_name': village_name, 'player_name': player_name}
     flag = is_village(village_name)
     if flag is True:
         player_flag = is_player(village_name, player_name)
         if player_flag is True:
             password_flag = check_player_password(village_name, player_name, password)
             if password_flag is True:
-                r = HTTPResponse(status=200, body=body)
+                data['session_id'] = 1
+                status = 200
             else:
-                r = HTTPResponse(status=403, body=body)
+                status = 403
         else:
-            r = HTTPResponse(status=400, body=body)
+            status = 400
     else:
-        r = HTTPResponse(status=404, body=body)
+        status = 404
 
+    body = json.dumps(data)
+    r = HTTPResponse(status=status, body=body)
     r.set_header('Content-Type', 'application/json')
     return r
 
