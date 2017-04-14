@@ -12,7 +12,7 @@ if __name__ == '__main__':
     dict_cur.execute("CREATE TABLE village (name varchar(255) PRIMARY KEY, password varchar(255))")
     conn.commit()
 
-    dict_cur.execute("CREATE TABLE player (name varchar(255) NOT NULL, password varchar(255), village_name varchar(255) REFERENCES village(name))")
+    dict_cur.execute("CREATE TABLE player (name varchar(255) NOT NULL, password varchar(1023), village_name varchar(255) REFERENCES village(name), session_id varchar(1023))")
     conn.commit()
 
     dict_cur.close()

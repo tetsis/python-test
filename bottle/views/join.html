@@ -17,6 +17,7 @@
         </div>
         <button type="button" class="btn btn-primary" id="btn_join">登録</button>
     </body>
+    <script type="text/javascript" src="{{url('static_file', filepath='js/sha256.js')}}"></script>
     <script type="text/javascript" src="{{url('static_file', filepath='js/common.js')}}"></script>
     <script type="text/javascript">
         function afterPost(status, responseText) {
@@ -24,10 +25,12 @@
             console.log('responseText = ' + responseText);
             data = JSON.parse(responseText);
             if (status == 200) {
-                //console.log('session_id=' + data['session_id']);
-                document.cookie = 'session_id=' + encodeURIComponent(data['session_id']) + '; path=/';
+                let password = window.localStorage.getItem("password");
+                let shaObj = new jsSHA(data['session_id'] + password, "ASCII");
+                let sha256digest = shaObj.getHash("SHA-256", "HEX");
+                document.cookie = 'session_id=' + encodeURIComponent(sha256digest) + '; path=/';
                 console.log('session_id = ' + getCookie('session_id'))
-                window.location.href = '../room/';
+                //window.location.href = '../room/';
             }
             else if (status == 409) {
                 document.getElementById('comment').innerHTML = '同じ名前のプレイヤーが既に存在しています。';
@@ -42,10 +45,14 @@
                 let port = window.location.port;
                 let ipt_playerName = document.getElementById('ipt_playerName').value;
                 let ipt_password = document.getElementById('ipt_password').value;
+                let shaObj = new jsSHA(ipt_password, "ASCII");
+                let sha256digest = shaObj.getHash("SHA-256", "HEX");
                 let data = {
                     player_name: ipt_playerName,
-                    password: ipt_password
+                    password: sha256digest
                 };
+                console.log(data);
+                window.localStorage.setItem("password", sha256digest);
                 console.log(data);
                 postToAPI('http://' + hostname + ':' + port + '/api/{{village_name}}/', data, afterPost);
             }

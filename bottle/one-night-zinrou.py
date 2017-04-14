@@ -2,6 +2,8 @@ from bottle import route, run, template, get, post, put, delete, request, view, 
 import json
 import requests
 import psycopg2.extras
+import random
+import hashlib
 
 village = {}
 
@@ -145,13 +147,15 @@ def post_village(village_name):
     if flag is True:
         player_flag = is_player(village_name, player_name)
         if player_flag is False:
+            session_id = str(random.random())
+            next_session_id = hashlib.sha256(str(session_id + password).encode('utf-8')).hexdigest()
             conn = psycopg2.connect("host=127.0.0.1 port=5432 dbname=one_night_zinrou user=one_night_zinrou password=one_night_zinrou")
             dict_cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-            dict_cur.execute("insert into player (name, password, village_name) values (%s, %s, %s)", (player_name, password, village_name))
+            dict_cur.execute("insert into player (name, password, village_name, session_id) values (%s, %s, %s, %s)", (player_name, password, village_name, next_session_id))
             conn.commit()
             dict_cur.close()
             conn.close()
-            data['session_id'] = 1
+            data['session_id'] = session_id
             status = 200
         else:
             status = 409
