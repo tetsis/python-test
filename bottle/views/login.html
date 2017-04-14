@@ -24,7 +24,7 @@
             console.log('responseText = ' + responseText);
             data = JSON.parse(responseText);
             if (status == 200) {
-                document.cookie = 'session_id=' + encodeURIComponent(data['session_id'])
+                document.cookie = 'session_id=' + encodeURIComponent(data['session_id']) + '; path=/';
                 console.log('session_id = ' + getCookie('session_id'))
                 window.location.href = '../room/';
             }

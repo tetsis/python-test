@@ -47,6 +47,8 @@ def join(village_name):
 @route('/<village_name:re:[0-9A-Za-z]*>/room/')
 @view('room')
 def room(village_name):
+    session_id = request.get_cookie('session_id')
+    print(session_id)
     return dict(url=url, village_name=village_name)
 
 # 村の個人ページ
@@ -149,6 +151,7 @@ def post_village(village_name):
             conn.commit()
             dict_cur.close()
             conn.close()
+            data['session_id'] = 1
             status = 200
         else:
             status = 409
