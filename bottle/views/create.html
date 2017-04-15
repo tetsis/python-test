@@ -16,6 +16,7 @@
         </div>
         <button type="button" class="btn btn-primary" id="btn_create">作成</button>
     </body>
+    <script type="text/javascript" src="{{url('static_file', filepath='js/sha256.js')}}"></script>
     <script type="text/javascript" src="{{url('static_file', filepath='js/common.js')}}"></script>
     <script type="text/javascript">
         function afterPost(status, responseText) {
@@ -36,11 +37,14 @@
                 let port = window.location.port;
                 let ipt_villageName = document.getElementById('ipt_villageName').value;
                 let ipt_password = document.getElementById('ipt_password').value;
+                let shaObj = new jsSHA(ipt_password, "ASCII");
+                let sha256digest = shaObj.getHash("SHA-256", "HEX");
                 let data = {
                     village_name: ipt_villageName,
-                    password: ipt_password
+                    password: sha256digest
                 };
                 console.log(data);
+                window.localStorage.setItem("password", sha256digest);
                 postToAPI('http://' + hostname + ':' + port + '/api/', data, afterPost);
             }
             , false);
