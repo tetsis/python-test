@@ -30,7 +30,7 @@
                 let sha256digest = shaObj.getHash("SHA-256", "HEX");
                 document.cookie = 'session_id=' + encodeURIComponent(sha256digest) + '; path=/';
                 console.log('session_id = ' + getCookie('session_id'))
-                //window.location.href = '../room/';
+                window.location.href = '../room/';
             }
             else if (status == 409) {
                 document.getElementById('comment').innerHTML = '同じ名前のプレイヤーが既に存在しています。';

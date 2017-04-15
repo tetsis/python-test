@@ -11,5 +11,15 @@
     </body>
     <script type="text/javascript" src="{{url('static_file', filepath='js/common.js')}}"></script>
     <script type="text/javascript">
+        window.addEventListener('load',
+            function (event) {
+                let session_id = {{session_id}}
+                let password = window.localStorage.getItem("password");
+                let shaObj = new jsSHA(session_id + password, "ASCII");
+                let sha256digest = shaObj.getHash("SHA-256", "HEX");
+                document.cookie = 'session_id=' + encodeURIComponent(sha256digest) + '; path=/';
+                console.log('session_id = ' + getCookie('session_id'))
+            }
+        , false);
     </script>
 </html>

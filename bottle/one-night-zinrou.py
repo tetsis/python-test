@@ -51,7 +51,28 @@ def join(village_name):
 def room(village_name):
     session_id = request.get_cookie('session_id')
     print(session_id)
-    return dict(url=url, village_name=village_name)
+
+    conn = psycopg2.connect("host=127.0.0.1 port=5432 dbname=one_night_zinrou user=one_night_zinrou password=one_night_zinrou")
+    dict_cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    dict_cur.execute("select name, password from player where (village_name)=(%s)", (village_name,))
+    print(dict_cur)
+    for row in dict_cur:
+        print(row)
+        print('kita')
+        player_name = row['name']
+        password = row['password']
+        print('kitakita')
+        new_session_id = str(random.random())
+        new_next_session_id = hashlib.sha256(str(new_session_id + password).encode('utf-8')).hexdigest()
+        print('kita3')
+        dict_cur.execute("update player set (session_id)=(%s) where (name)=(%s) and (village_name)=(%s)", (new_next_session_id, player_name, village_name))
+        print('kita4')
+        conn.commit()
+        print('kita5')
+    dict_cur.close()
+    conn.close()
+    print('kita6')
+    return dict(url=url, player_name=player_name, village_name=village_name, session_id=new_session_id)
 
 # 村の個人ページ
 @route('/<village_name:re:[0-9A-Za-z]*>/player/<player_name:re:[0-9A-Za-z]*>/')
