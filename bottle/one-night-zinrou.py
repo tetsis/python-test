@@ -236,7 +236,7 @@ def post_login(village_name):
                 next_session_id = hashlib.sha256(str(session_id + password).encode('utf-8')).hexdigest()
                 conn = psycopg2.connect("host=127.0.0.1 port=5432 dbname=one_night_zinrou user=one_night_zinrou password=one_night_zinrou")
                 dict_cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-                dict_cur.execute("update player set (session_id)=(%s) where (name)=(%s) and (village_name)=(%s)", (new_next_session_id, player_name, village_name))
+                dict_cur.execute("update player set (session_id)=(%s) where (name)=(%s) and (village_name)=(%s)", (next_session_id, player_name, village_name))
                 conn.commit()
                 dict_cur.close()
                 conn.close()
