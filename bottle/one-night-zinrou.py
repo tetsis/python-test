@@ -54,19 +54,27 @@ def room(village_name):
 
     conn = psycopg2.connect("host=127.0.0.1 port=5432 dbname=one_night_zinrou user=one_night_zinrou password=one_night_zinrou")
     dict_cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    dict_cur.execute("select name, password from player where (village_name)=(%s)", (village_name,))
+    dict_cur.execute("select name, password from player where (village_name)=(%s) and (session_id)=(%s)", (village_name, session_id, ))
     print(dict_cur)
+    player_name = ''
     for row in dict_cur:
         player_name = row['name']
         password = row['password']
-    new_session_id = str(random.random())
-    new_next_session_id = hashlib.sha256(str(new_session_id + password).encode('utf-8')).hexdigest()
-    print(new_session_id)
-    print(new_next_session_id)
-    dict_cur.execute("update player set (session_id)=(%s) where (name)=(%s) and (village_name)=(%s)", (new_next_session_id, player_name, village_name))
-    conn.commit()
+    flag = False
+    new_session_id = ''
+    if player_name != '':
+        print('Success')
+        flag = True
+        new_session_id = str(random.random())
+        new_next_session_id = hashlib.sha256(str(new_session_id + password).encode('utf-8')).hexdigest()
+        print(new_session_id)
+        print(new_next_session_id)
+        dict_cur.execute("update player set (session_id)=(%s) where (name)=(%s) and (village_name)=(%s)", (new_next_session_id, player_name, village_name))
+        conn.commit()
+
     dict_cur.close()
     conn.close()
+
     return dict(url=url, player_name=player_name, village_name=village_name, session_id=new_session_id)
 
 # 村の個人ページ
@@ -224,7 +232,15 @@ def post_login(village_name):
         if player_flag is True:
             password_flag = check_player_password(village_name, player_name, password)
             if password_flag is True:
-                data['session_id'] = 1
+                session_id = str(random.random())
+                next_session_id = hashlib.sha256(str(session_id + password).encode('utf-8')).hexdigest()
+                conn = psycopg2.connect("host=127.0.0.1 port=5432 dbname=one_night_zinrou user=one_night_zinrou password=one_night_zinrou")
+                dict_cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+                dict_cur.execute("insert into player (name, password, village_name, session_id) values (%s, %s, %s, %s)", (player_name, password, village_name, next_session_id))
+                conn.commit()
+                dict_cur.close()
+                conn.close()
+                data['session_id'] = session_id
                 status = 200
             else:
                 status = 403
