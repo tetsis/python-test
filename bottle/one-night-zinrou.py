@@ -57,21 +57,16 @@ def room(village_name):
     dict_cur.execute("select name, password from player where (village_name)=(%s)", (village_name,))
     print(dict_cur)
     for row in dict_cur:
-        print(row)
-        print('kita')
         player_name = row['name']
         password = row['password']
-        print('kitakita')
-        new_session_id = str(random.random())
-        new_next_session_id = hashlib.sha256(str(new_session_id + password).encode('utf-8')).hexdigest()
-        print('kita3')
-        dict_cur.execute("update player set (session_id)=(%s) where (name)=(%s) and (village_name)=(%s)", (new_next_session_id, player_name, village_name))
-        print('kita4')
-        conn.commit()
-        print('kita5')
+    new_session_id = str(random.random())
+    new_next_session_id = hashlib.sha256(str(new_session_id + password).encode('utf-8')).hexdigest()
+    print(new_session_id)
+    print(new_next_session_id)
+    dict_cur.execute("update player set (session_id)=(%s) where (name)=(%s) and (village_name)=(%s)", (new_next_session_id, player_name, village_name))
+    conn.commit()
     dict_cur.close()
     conn.close()
-    print('kita6')
     return dict(url=url, player_name=player_name, village_name=village_name, session_id=new_session_id)
 
 # 村の個人ページ
