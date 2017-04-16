@@ -64,11 +64,14 @@ def room(village_name):
         print(new_next_session_id)
         dict_cur.execute("update player set (session_id)=(%s) where (name)=(%s) and (village_name)=(%s)", (new_next_session_id, player_name, village_name))
         conn.commit()
-
     dict_cur.close()
     conn.close()
 
-    return template('room', url=url, player_name=player_name, village_name=village_name, session_id=new_session_id)
+    if flag is True:
+        return template('room', url=url, player_name=player_name, village_name=village_name, session_id=new_session_id)
+    else:
+        return template('session_error')
+
 
 # 村の個人ページ
 @route('/<village_name:re:[0-9A-Za-z]*>/player/<player_name:re:[0-9A-Za-z]*>/')
