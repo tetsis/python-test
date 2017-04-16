@@ -56,12 +56,9 @@ def room(village_name):
     flag = False
     new_session_id = ''
     if player_name != '':
-        print('Success')
         flag = True
         new_session_id = str(random.random())
         new_next_session_id = hashlib.sha256(str(new_session_id + password).encode('utf-8')).hexdigest()
-        print(new_session_id)
-        print(new_next_session_id)
         dict_cur.execute("update player set (session_id)=(%s) where (name)=(%s) and (village_name)=(%s)", (new_next_session_id, player_name, village_name))
         conn.commit()
     dict_cur.close()
