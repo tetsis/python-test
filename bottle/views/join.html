@@ -15,6 +15,10 @@
         <label for="password">パスワード</label>
         <input type="password" class="form-control" id="ipt_password" placeholder="Password">
         </div>
+        <div class="form-group">
+        <label for="village_password">村のパスワード</label>
+        <input type="password" class="form-control" id="ipt_village_password" placeholder="Village password">
+        </div>
         <button type="button" class="btn btn-primary" id="btn_join">登録</button>
     </body>
     <script type="text/javascript" src="{{url('static_file', filepath='js/sha256.js')}}"></script>
@@ -25,12 +29,17 @@
             console.log('responseText = ' + responseText);
             data = JSON.parse(responseText);
             if (status == 200) {
-                let password = window.localStorage.getItem("password");
-                let shaObj = new jsSHA(data['session_id'] + password, "ASCII");
+                let sessionId = data['session_id'] + '';
+                let password = window.localStorage.getItem("password") + '';
+                let villagePassword = window.localStorage.getItem("village_password") + '';
+                let shaObj = new jsSHA(sessionId + password + villagePassword, "ASCII");
                 let sha256digest = shaObj.getHash("SHA-256", "HEX");
                 document.cookie = 'session_id=' + encodeURIComponent(sha256digest) + '; path=/';
                 console.log('session_id = ' + getCookie('session_id'))
                 window.location.href = '../room/';
+            }
+            else if (status == 403) {
+                document.getElementById('comment').innerHTML = 'パスワードが正しくありません。';
             }
             else if (status == 409) {
                 document.getElementById('comment').innerHTML = '同じ名前のプレイヤーが既に存在しています。';
@@ -45,14 +54,19 @@
                 let port = window.location.port;
                 let ipt_playerName = document.getElementById('ipt_playerName').value;
                 let ipt_password = document.getElementById('ipt_password').value;
-                let shaObj = new jsSHA(ipt_password, "ASCII");
-                let sha256digest = shaObj.getHash("SHA-256", "HEX");
+                let ipt_villagePassword = document.getElementById('ipt_village_password').value;
+                let hashedPasswordObj = new jsSHA(ipt_password, "ASCII");
+                let hashedPassword = hashedPasswordObj.getHash("SHA-256", "HEX");
+                let hashedVillagePasswordObj = new jsSHA(ipt_villagePassword, "ASCII");
+                let hashedVillagePassword = hashedVillagePasswordObj.getHash("SHA-256", "HEX");
                 let data = {
                     player_name: ipt_playerName,
-                    password: sha256digest
+                    password: hashedPassword,
+                    village_password: hashedVillagePassword
                 };
                 console.log(data);
-                window.localStorage.setItem("password", sha256digest);
+                window.localStorage.setItem("password", hashedPassword);
+                window.localStorage.setItem("village_password", hashedVillagePassword);
                 console.log(data);
                 postToAPI('http://' + hostname + ':' + port + '/api/{{village_name}}/', data, afterPost);
             }

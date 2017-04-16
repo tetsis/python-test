@@ -159,25 +159,30 @@ def get_village(village_name):
 @post('/api/<village_name:re:[0-9A-Za-z]*>/')
 def post_village(village_name):
     print(request.json)
-    player_name = request.json.get("player_name")
-    password = request.json.get("password")
+    player_name = str(request.json.get("player_name"))
+    password = str(request.json.get("password"))
+    village_password = str(request.json.get("village_password"))
     data = {'village_name': village_name, 'player_name': player_name}
     flag = is_village(village_name)
     if flag is True:
-        player_flag = is_player(village_name, player_name)
-        if player_flag is False:
-            session_id = str(random.random())
-            next_session_id = hashlib.sha256(str(session_id + password).encode('utf-8')).hexdigest()
-            conn = psycopg2.connect("host=127.0.0.1 port=5432 dbname=one_night_zinrou user=one_night_zinrou password=one_night_zinrou")
-            dict_cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-            dict_cur.execute("insert into player (name, password, village_name, session_id) values (%s, %s, %s, %s)", (player_name, password, village_name, next_session_id))
-            conn.commit()
-            dict_cur.close()
-            conn.close()
-            data['session_id'] = session_id
-            status = 200
+        village_password_flag = check_village_password(village_name, village_password)
+        if village_password_flag is True:
+            player_flag = is_player(village_name, player_name)
+            if player_flag is False:
+                session_id = str(random.random())
+                next_session_id = hashlib.sha256(str(session_id + password + village_password).encode('utf-8')).hexdigest()
+                conn = psycopg2.connect("host=127.0.0.1 port=5432 dbname=one_night_zinrou user=one_night_zinrou password=one_night_zinrou")
+                dict_cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+                dict_cur.execute("insert into player (name, password, village_name, session_id) values (%s, %s, %s, %s)", (player_name, password, village_name, next_session_id))
+                conn.commit()
+                dict_cur.close()
+                conn.close()
+                data['session_id'] = session_id
+                status = 200
+            else:
+                status = 409
         else:
-            status = 409
+            status = 403
     else:
         status = 404
 
@@ -218,29 +223,34 @@ def delete_logout(village_name, player_name):
 
 @post('/api/<village_name:re:[0-9A-Za-z]*>/login/')
 def post_login(village_name):
-    player_name = request.json.get("player_name")
-    password = request.json.get("password")
+    player_name = str(request.json.get("player_name"))
+    password = str(request.json.get("password"))
+    village_password = str(request.json.get("village_password"))
     data = {'village_name': village_name, 'player_name': player_name}
     flag = is_village(village_name)
     if flag is True:
-        player_flag = is_player(village_name, player_name)
-        if player_flag is True:
-            password_flag = check_player_password(village_name, player_name, password)
-            if password_flag is True:
-                session_id = str(random.random())
-                next_session_id = hashlib.sha256(str(session_id + password).encode('utf-8')).hexdigest()
-                conn = psycopg2.connect("host=127.0.0.1 port=5432 dbname=one_night_zinrou user=one_night_zinrou password=one_night_zinrou")
-                dict_cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-                dict_cur.execute("update player set (session_id)=(%s) where (name)=(%s) and (village_name)=(%s)", (next_session_id, player_name, village_name))
-                conn.commit()
-                dict_cur.close()
-                conn.close()
-                data['session_id'] = session_id
-                status = 200
+        village_password_flag = check_village_password(village_name, village_password)
+        if village_password_flag is True:
+            player_flag = is_player(village_name, player_name)
+            if player_flag is True:
+                password_flag = check_player_password(village_name, player_name, password)
+                if password_flag is True:
+                    session_id = str(random.random())
+                    next_session_id = hashlib.sha256(str(session_id + password + village_password).encode('utf-8')).hexdigest()
+                    conn = psycopg2.connect("host=127.0.0.1 port=5432 dbname=one_night_zinrou user=one_night_zinrou password=one_night_zinrou")
+                    dict_cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+                    dict_cur.execute("update player set (session_id)=(%s) where (name)=(%s) and (village_name)=(%s)", (next_session_id, player_name, village_name))
+                    conn.commit()
+                    dict_cur.close()
+                    conn.close()
+                    data['session_id'] = session_id
+                    status = 200
+                else:
+                    status = 403
             else:
-                status = 403
+                status = 400
         else:
-            status = 400
+            status = 403
     else:
         status = 404
 
