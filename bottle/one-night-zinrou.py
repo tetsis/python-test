@@ -11,43 +11,36 @@ village = {}
 
 # トップページ
 @route('/')
-@view('index')
 def index():
-    return dict()
+    return template('index')
 
 # 村参加ページ
 @route('/participate/')
-@view('participate')
 def participate():
-    return dict(url=url)
+    return template('participate', url=url)
 
 # 村作成ページ
 @route('/create/')
-@view('create')
 def create():
-    return dict(url=url)
+    return template('create', url=url)
 
 # 村のトップページ
 @route('/<village_name:re:[0-9A-Za-z]*>/')
-@view('village_index')
 def village_index(village_name):
-    return dict(url=url, village_name=village_name)
+    return template('village_index', url=url, village_name=village_name)
 
 # ログインページ
 @route('/<village_name:re:[0-9A-Za-z]*>/login/')
-@view('login')
 def login(village_name):
-    return dict(url=url, village_name=village_name)
+    return template('login', url=url, village_name=village_name)
 
 # 新規登録ページ
 @route('/<village_name:re:[0-9A-Za-z]*>/join/')
-@view('join')
 def join(village_name):
-    return dict(url=url, village_name=village_name)
+    return template('join', url=url, village_name=village_name)
 
 # 村の部屋ページ
 @route('/<village_name:re:[0-9A-Za-z]*>/room/')
-@view('room')
 def room(village_name):
     session_id = request.get_cookie('session_id')
     print(session_id)
@@ -55,11 +48,11 @@ def room(village_name):
     conn = psycopg2.connect("host=127.0.0.1 port=5432 dbname=one_night_zinrou user=one_night_zinrou password=one_night_zinrou")
     dict_cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     dict_cur.execute("select name, password from player where (village_name)=(%s) and (session_id)=(%s)", (village_name, session_id, ))
-    print(dict_cur)
     player_name = ''
+    password = ''
     for row in dict_cur:
-        player_name = row['name']
-        password = row['password']
+        player_name = str(row['name'])
+        password = str(row['password'])
     flag = False
     new_session_id = ''
     if player_name != '':
@@ -75,7 +68,7 @@ def room(village_name):
     dict_cur.close()
     conn.close()
 
-    return dict(url=url, player_name=player_name, village_name=village_name, session_id=new_session_id)
+    return template('room', url=url, player_name=player_name, village_name=village_name, session_id=new_session_id)
 
 # 村の個人ページ
 @route('/<village_name:re:[0-9A-Za-z]*>/player/<player_name:re:[0-9A-Za-z]*>/')
@@ -170,7 +163,7 @@ def post_village(village_name):
             player_flag = is_player(village_name, player_name)
             if player_flag is False:
                 session_id = str(random.random())
-                next_session_id = hashlib.sha256(str(session_id + password + village_password).encode('utf-8')).hexdigest()
+                next_session_id = hashlib.sha256(str(session_id + password).encode('utf-8')).hexdigest()
                 conn = psycopg2.connect("host=127.0.0.1 port=5432 dbname=one_night_zinrou user=one_night_zinrou password=one_night_zinrou")
                 dict_cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
                 dict_cur.execute("insert into player (name, password, village_name, session_id) values (%s, %s, %s, %s)", (player_name, password, village_name, next_session_id))
@@ -236,7 +229,7 @@ def post_login(village_name):
                 password_flag = check_player_password(village_name, player_name, password)
                 if password_flag is True:
                     session_id = str(random.random())
-                    next_session_id = hashlib.sha256(str(session_id + password + village_password).encode('utf-8')).hexdigest()
+                    next_session_id = hashlib.sha256(str(session_id + password).encode('utf-8')).hexdigest()
                     conn = psycopg2.connect("host=127.0.0.1 port=5432 dbname=one_night_zinrou user=one_night_zinrou password=one_night_zinrou")
                     dict_cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
                     dict_cur.execute("update player set (session_id)=(%s) where (name)=(%s) and (village_name)=(%s)", (next_session_id, player_name, village_name))
