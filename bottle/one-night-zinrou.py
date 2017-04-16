@@ -129,16 +129,11 @@ def post_api_participate():
     global village
     print(request.json)
     village_name = request.json.get("village_name")
-    password = request.json.get("password")
     data = {'village_name': village_name}
 
     flag = is_village(village_name)
     if flag is True:
-        password_flag = check_village_password(village_name, password)
-        if password_flag is True:
-            status = 200
-        else:
-            status = 403
+        status = 200
     else:
         status = 404
 
