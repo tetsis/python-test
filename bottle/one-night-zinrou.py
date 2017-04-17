@@ -47,7 +47,7 @@ def room(village_name):
 
     conn = psycopg2.connect("host=127.0.0.1 port=5432 dbname=one_night_zinrou user=one_night_zinrou password=one_night_zinrou")
     dict_cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    dict_cur.execute("select name, password from player where (village_name)=(%s) and (session_id)=(%s)", (village_name, session_id, ))
+    dict_cur.execute("select player.name, player.password from player, village where player.village_id = village.id and (village.name)=(%s) and (session_id)=(%s)", (village_name, session_id, ))
     player_name = ''
     password = ''
     for row in dict_cur:
@@ -59,8 +59,13 @@ def room(village_name):
         flag = True
         new_session_id = str(random.random())
         new_next_session_id = hashlib.sha256(str(new_session_id + password).encode('utf-8')).hexdigest()
-        dict_cur.execute("update player set (session_id)=(%s) where (name)=(%s) and (village_name)=(%s)", (new_next_session_id, player_name, village_name))
-        conn.commit()
+        dict_cur.execute("select id from village where (name)=(%s)", (village_name,))
+        village_id = ''
+        for row in dict_cur:
+            village_id = str(row['id'])
+        if village_id != '':
+            dict_cur.execute("update player set (session_id)=(%s) where (name)=(%s) and (village_id)=(%s)", (new_next_session_id, player_name, village_id))
+            conn.commit()
     dict_cur.close()
     conn.close()
 
@@ -166,8 +171,13 @@ def post_village(village_name):
                 next_session_id = hashlib.sha256(str(session_id + password).encode('utf-8')).hexdigest()
                 conn = psycopg2.connect("host=127.0.0.1 port=5432 dbname=one_night_zinrou user=one_night_zinrou password=one_night_zinrou")
                 dict_cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-                dict_cur.execute("insert into player (name, password, village_name, session_id) values (%s, %s, %s, %s)", (player_name, password, village_name, next_session_id))
-                conn.commit()
+                dict_cur.execute("select id from village where (name)=(%s)", (village_name,))
+                village_id = ''
+                for row in dict_cur:
+                    village_id = str(row['id'])
+                if village_id != '':
+                    dict_cur.execute("insert into player (name, password, village_id, session_id) values (%s, %s, %s, %s)", (player_name, password, village_id, next_session_id))
+                    conn.commit()
                 dict_cur.close()
                 conn.close()
                 data['session_id'] = session_id
@@ -194,7 +204,7 @@ def delete_logout(village_name, player_name):
             dict_cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
             dict_cur.execute("delete from player where (name)=(%s)", (player_name,))
             conn.commit()
-            dict_cur.execute("select name from player where (village_name)=(%s)", (village_name,))
+            dict_cur.execute("select player.name from player, village where player.village_id = village.id and (village.name)=(%s)", (village_name,))
             i = 0
             for row in dict_cur:
                 i += 1
@@ -232,8 +242,13 @@ def post_login(village_name):
                     next_session_id = hashlib.sha256(str(session_id + password).encode('utf-8')).hexdigest()
                     conn = psycopg2.connect("host=127.0.0.1 port=5432 dbname=one_night_zinrou user=one_night_zinrou password=one_night_zinrou")
                     dict_cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-                    dict_cur.execute("update player set (session_id)=(%s) where (name)=(%s) and (village_name)=(%s)", (next_session_id, player_name, village_name))
-                    conn.commit()
+                    dict_cur.execute("select id from village where (name)=(%s)", (village_name,))
+                    village_id = ''
+                    for row in dict_cur:
+                        village_id = str(row['id'])
+                    if village_id != '':
+                        dict_cur.execute("update player set (session_id)=(%s) where (name)=(%s) and (village_id)=(%s)", (next_session_id, player_name, village_id))
+                        conn.commit()
                     dict_cur.close()
                     conn.close()
                     data['session_id'] = session_id
@@ -289,7 +304,7 @@ def check_village_password(village_name, password):
 def is_player(village_name, player_name):
     conn = psycopg2.connect("host=127.0.0.1 port=5432 dbname=one_night_zinrou user=one_night_zinrou password=one_night_zinrou")
     dict_cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    dict_cur.execute("select name from player where (village_name)=(%s)", (village_name,))
+    dict_cur.execute("select player.name from player, village where player.village_id = village.id and (village.name)=(%s)", (village_name,))
     flag = False
     for row in dict_cur:
         if row['name'] == player_name:
@@ -303,7 +318,7 @@ def is_player(village_name, player_name):
 def check_player_password(village_name, player_name, password):
     conn = psycopg2.connect("host=127.0.0.1 port=5432 dbname=one_night_zinrou user=one_night_zinrou password=one_night_zinrou")
     dict_cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    dict_cur.execute("select password from player where (village_name)=(%s) and (name)=(%s)", (village_name, player_name))
+    dict_cur.execute("select player.password from player, village where player.village_id = village.id and (village.name)=(%s) and (player.name)=(%s)", (village_name, player_name))
     flag = False
     for row in dict_cur:
         if row['password'] == password:

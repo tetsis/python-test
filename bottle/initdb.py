@@ -31,10 +31,10 @@ if __name__ == '__main__':
     dict_cur.execute("INSERT INTO position (position) VALUES (%s)", ('hanging',))
     conn.commit()
 
-    dict_cur.execute("CREATE TABLE village (id serial PRIMARY KEY, name varchar(255) NOT NULL, password varchar(255), state int REFERENCES state(id), villager_number integer, werewolf_number integer, fortuneteller_number integer, thief_number integer, madman_number integer, hanging_number integer, talking_time integer, ending_time timestamp, field_position1 int REFERENCES position(id), field_position2 int REFERENCES position(id), winner_side int REFERENCES position(id))")
+    dict_cur.execute("CREATE TABLE village (id serial PRIMARY KEY, name varchar(255) NOT NULL, password varchar(255), state int REFERENCES state(id), villager_number integer DEFAULT 0, werewolf_number integer DEFAULT 0, fortuneteller_number integer DEFAULT 0, thief_number integer DEFAULT 0, madman_number integer DEFAULT 0, hanging_number integer DEFAULT 0, talking_time integer DEFAULT 0, ending_time timestamp, field_position1 int REFERENCES position(id), field_position2 int REFERENCES position(id), winner_side int REFERENCES position(id))")
     conn.commit()
 
-    dict_cur.execute("CREATE TABLE player (id serial PRIMARY KEY, name varchar(255) NOT NULL, password varchar(1023), village_name int REFERENCES village(id), session_id varchar(1023), point integer, earning_point integer, position int REFERENCES position(id), game_start_flag boolean, talks_start_flag boolean, talks_end_flag boolean, execution_flag boolean, result_flag boolean, action_flag boolean, winner_or_loser integer, selection_player int REFERENCES player(id), hanging_player int REFERENCES player(id))")
+    dict_cur.execute("CREATE TABLE player (id serial PRIMARY KEY, name varchar(255) NOT NULL, password varchar(1023), village_id int REFERENCES village(id), session_id varchar(1023), point integer DEFAULT 0, earning_point integer DEFAULT 0, position int REFERENCES position(id), game_start_flag boolean DEFAULT FALSE, talks_start_flag boolean DEFAULT FALSE, talks_end_flag boolean DEFAULT FALSE, execution_flag boolean DEFAULT FALSE, result_flag boolean DEFAULT FALSE, action_flag boolean DEFAULT FALSE, winner_or_loser boolean DEFAULT FALSE, selection_player int REFERENCES player(id), hanging_player int REFERENCES player(id))")
     conn.commit()
 
     dict_cur.close()
