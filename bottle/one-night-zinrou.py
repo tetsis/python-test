@@ -27,53 +27,88 @@ def create():
 # 村のトップページ
 @route('/<village_name:re:[0-9A-Za-z]*>/')
 def village_index(village_name):
-    return template('village_index', url=url, village_name=village_name)
+    flag = is_village(village_name)
+    if flag is True:
+        return template('village_index', url=url, village_name=village_name)
+
+    r = HTTPResponse(status=404)
+    return r
 
 # ログインページ
 @route('/<village_name:re:[0-9A-Za-z]*>/login/')
 def login(village_name):
-    return template('login', url=url, village_name=village_name)
+    flag = is_village(village_name)
+    if flag is True:
+        return template('login', url=url, village_name=village_name)
+
+    r = HTTPResponse(status=404)
+    return r
 
 # 新規登録ページ
 @route('/<village_name:re:[0-9A-Za-z]*>/join/')
 def join(village_name):
-    return template('join', url=url, village_name=village_name)
+    flag = is_village(village_name)
+    if flag is True:
+        return template('join', url=url, village_name=village_name)
+
+    r = HTTPResponse(status=404)
+    return r
 
 # 村の部屋ページ
 @route('/<village_name:re:[0-9A-Za-z]*>/room/')
 def room(village_name):
-    session_id = request.get_cookie('session_id')
-    print(session_id)
-
-    conn = psycopg2.connect("host=127.0.0.1 port=5432 dbname=one_night_zinrou user=one_night_zinrou password=one_night_zinrou")
-    dict_cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    dict_cur.execute("select player.name, player.password from player, village where player.village_id = village.id and (village.name)=(%s) and (session_id)=(%s)", (village_name, session_id, ))
-    player_name = ''
-    password = ''
-    for row in dict_cur:
-        player_name = str(row['name'])
-        password = str(row['password'])
-    flag = False
-    new_session_id = ''
-    if player_name != '':
-        flag = True
-        new_session_id = str(random.random())
-        new_next_session_id = hashlib.sha256(str(new_session_id + password).encode('utf-8')).hexdigest()
-        dict_cur.execute("select id from village where (name)=(%s)", (village_name,))
-        village_id = ''
-        for row in dict_cur:
-            village_id = str(row['id'])
-        if village_id != '':
-            dict_cur.execute("update player set (session_id)=(%s) where (name)=(%s) and (village_id)=(%s)", (new_next_session_id, player_name, village_id))
-            conn.commit()
-    dict_cur.close()
-    conn.close()
-
+    flag = is_village(village_name)
     if flag is True:
-        return template('room', url=url, player_name=player_name, village_name=village_name, session_id=new_session_id)
+        session_id = request.get_cookie('session_id')
+
+        result = auth(village_name, session_id)
+
+        player_name = result['player_name']
+        new_session_id = result['new_session_id']
+
+        if player_name != '':
+            return template('room', url=url, player_name=player_name, village_name=village_name, session_id=new_session_id)
+        else:
+            return template('session_error')
+
+    r = HTTPResponse(status=404)
+    return r
+
+# 村の待機ページ
+@route('/<village_name:re:[0-9A-Za-z]*>/waiting/')
+def waiting(village_name):
+    session_id = request.get_cookie('session_id')
+    result = auth(village_name, session_id)
+    player_name = result['player_name']
+    new_session_id = result['new_session_id']
+    if player_name != '':
+        return template('waiting', url=url, player_name=player_name, village_name=village_name, session_id=new_session_id)
     else:
         return template('session_error')
 
+# 村の行動ページ
+@route('/<village_name:re:[0-9A-Za-z]*>/action/')
+def action(village_name):
+    session_id = request.get_cookie('session_id')
+    result = auth(village_name, session_id)
+    player_name = result['player_name']
+    new_session_id = result['new_session_id']
+    if player_name != '':
+        return template('action', url=url, player_name=player_name, village_name=village_name, session_id=new_session_id)
+    else:
+        return template('session_error')
+
+# 村の通知ページ
+@route('/<village_name:re:[0-9A-Za-z]*>/notification/')
+def notification(village_name):
+    session_id = request.get_cookie('session_id')
+    result = auth(village_name, session_id)
+    player_name = result['player_name']
+    new_session_id = result['new_session_id']
+    if player_name != '':
+        return template('notification', url=url, player_name=player_name, village_name=village_name, session_id=new_session_id)
+    else:
+        return template('session_error')
 
 # 村の個人ページ
 @route('/<village_name:re:[0-9A-Za-z]*>/player/<player_name:re:[0-9A-Za-z]*>/')
@@ -328,6 +363,31 @@ def check_player_password(village_name, player_name, password):
     conn.close()
 
     return flag
+
+def auth(village_name, session_id):
+    conn = psycopg2.connect("host=127.0.0.1 port=5432 dbname=one_night_zinrou user=one_night_zinrou password=one_night_zinrou")
+    dict_cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    dict_cur.execute("select player.name, player.password from player, village where player.village_id = village.id and (village.name)=(%s) and (session_id)=(%s)", (village_name, session_id, ))
+    player_name = ''
+    password = ''
+    for row in dict_cur:
+        player_name = str(row['name'])
+        password = str(row['password'])
+    new_session_id = ''
+    if player_name != '':
+        new_session_id = str(random.random())
+        new_next_session_id = hashlib.sha256(str(new_session_id + password).encode('utf-8')).hexdigest()
+        dict_cur.execute("select id from village where (name)=(%s)", (village_name,))
+        village_id = ''
+        for row in dict_cur:
+            village_id = str(row['id'])
+        if village_id != '':
+            dict_cur.execute("update player set (session_id)=(%s) where (name)=(%s) and (village_id)=(%s)", (new_next_session_id, player_name, village_id))
+            conn.commit()
+    dict_cur.close()
+    conn.close()
+
+    return {'player_name': player_name, 'new_session_id': new_session_id}
 
 # ビルトインの開発用サーバーの起動
 # ここでは、debugとreloaderを有効にしている
