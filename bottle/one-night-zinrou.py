@@ -67,48 +67,18 @@ def room(village_name):
         new_session_id = result['new_session_id']
 
         if player_name != '':
-            return template('room', url=url, player_name=player_name, village_name=village_name, session_id=new_session_id)
+            conn = psycopg2.connect("host=127.0.0.1 port=5432 dbname=one_night_zinrou user=one_night_zinrou password=one_night_zinrou")
+            dict_cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+            dict_cur.execute("select state.state from village, state where village.state = state.id and (village.name)=(%s)", (village_name,))
+            #state = dict_cur.fetchone()
+            for row in dict_cur:
+                state = str(row['state'])
+                print(state)
+            return template(state, url=url, player_name=player_name, village_name=village_name, session_id=new_session_id)
         else:
             return template('session_error')
 
-    r = HTTPResponse(status=404)
-    return r
-
-# 村の待機ページ
-@route('/<village_name:re:[0-9A-Za-z]*>/waiting/')
-def waiting(village_name):
-    session_id = request.get_cookie('session_id')
-    result = auth(village_name, session_id)
-    player_name = result['player_name']
-    new_session_id = result['new_session_id']
-    if player_name != '':
-        return template('waiting', url=url, player_name=player_name, village_name=village_name, session_id=new_session_id)
-    else:
-        return template('session_error')
-
-# 村の行動ページ
-@route('/<village_name:re:[0-9A-Za-z]*>/action/')
-def action(village_name):
-    session_id = request.get_cookie('session_id')
-    result = auth(village_name, session_id)
-    player_name = result['player_name']
-    new_session_id = result['new_session_id']
-    if player_name != '':
-        return template('action', url=url, player_name=player_name, village_name=village_name, session_id=new_session_id)
-    else:
-        return template('session_error')
-
-# 村の通知ページ
-@route('/<village_name:re:[0-9A-Za-z]*>/notification/')
-def notification(village_name):
-    session_id = request.get_cookie('session_id')
-    result = auth(village_name, session_id)
-    player_name = result['player_name']
-    new_session_id = result['new_session_id']
-    if player_name != '':
-        return template('notification', url=url, player_name=player_name, village_name=village_name, session_id=new_session_id)
-    else:
-        return template('session_error')
+    return template('village_error')
 
 # 村の個人ページ
 @route('/<village_name:re:[0-9A-Za-z]*>/player/<player_name:re:[0-9A-Za-z]*>/')

@@ -3,6 +3,7 @@
     <head>
         <meta charset="utf-8">
         <title>{{village_name}}村 - ワンナイト人狼</title>
+        <link rel="stylesheet" href="{{url('static_file', filepath='css/main.css')}}">
     </head>
     <body>
         <h1>Waiting</h1>
@@ -10,19 +11,160 @@
         {{village_name}}村
         {{player_name}}
         </div>
+        <div class="header">プレイヤー</div>
+        <div class="table_table">
+            <div class="box_participant box_top table-cell">
+                <table class="table table-bordered">
+                    <tbody id="tbody_playerListInWaiting">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="header">役職構成</div>
+        <div class="table_table">
+            <div class="box_position table-cell">村人</div>
+            <div class="box_operator table-cell"><input type="button" id="btn_decrementOfNumberOfVillager" class="btn btn-raised btn-default btn_operator" value="－"></div>
+            <div class="box_value table-cell"><div id="scrn_numberOfVillagerInWaiting"></div></div>
+            <div class="box_operator table-cell"><input type="button" id="btn_incrementOfNumberOfVillager" class="btn btn-raised btn-default btn_operator" value="＋"></div>
+        </div>
+        <div class="table_table">
+            <div class="box_position table-cell">人狼</div>
+            <div class="box_operator table-cell"><input type="button" id="btn_decrementOfNumberOfWerewolf" class="btn btn-raised btn-default btn_operator" value="－"></div>
+            <div class="box_value table-cell"><div id="scrn_numberOfWerewolfInWaiting"></div></div>
+            <div class="box_operator table-cell"><input type="button" id="btn_incrementOfNumberOfWerewolf" class="btn btn-raised btn-default btn_operator" value="＋"></div>
+        </div>
+        <div class="table_table">
+            <div class="box_position table-cell">占い師</div>
+            <div class="box_operator table-cell"><input type="button" id="btn_decrementOfNumberOfFortuneteller" class="btn btn-raised btn-default btn_operator" value="－"></div>
+            <div class="box_value table-cell"><div id="scrn_numberOfFortunetellerInWaiting"></div></div>
+            <div class="box_operator table-cell"><input type="button" id="btn_incrementOfNumberOfFortuneteller" class="btn btn-raised btn-default btn_operator" value="＋"></div>
+        </div>
+        <div class="table_table">
+            <div class="box_position table-cell">怪盗</div>
+            <div class="box_operator table-cell"><input type="button" id="btn_decrementOfNumberOfThief" class="btn btn-raised btn-default btn_operator" value="－"></div>
+            <div class="box_value table-cell"><div id="scrn_numberOfThiefInWaiting"></div></div>
+            <div class="box_operator table-cell"><input type="button" id="btn_incrementOfNumberOfThief" class="btn btn-raised btn-default btn_operator" value="＋"></div>
+        </div>
+        <div class="table_table">
+            <div class="box_position table-cell">狂人</div>
+            <div class="box_operator table-cell"><input type="button" id="btn_decrementOfNumberOfMadman" class="btn btn-raised btn-default btn_operator" value="－"></div>
+            <div class="box_value table-cell"><div id="scrn_numberOfMadmanInWaiting"></div></div>
+            <div class="box_operator table-cell"><input type="button" id="btn_incrementOfNumberOfMadman" class="btn btn-raised btn-default btn_operator" value="＋"></div>
+        </div>
+        <div class="table_table">
+            <div class="box_position table-cell">てるてる</div>
+            <div class="box_operator table-cell"><input type="button" id="btn_decrementOfNumberOfHanging" class="btn btn-raised btn-default btn_operator" value="－"></div>
+            <div class="box_value table-cell"><div id="scrn_numberOfHangingInWaiting"></div></div>
+            <div class="box_operator table-cell"><input type="button" id="btn_incrementOfNumberOfHanging" class="btn btn-raised btn-default btn_operator" value="＋"></div>
+        </div>
+        <div class="table_left">
+            <div class="box_position table-cell">残り</div>
+            <div class="box_operator table-cell"></div>
+            <div class="box_value table-cell"><div id="scrn_left"></div></div>
+            <div class="box_operator table-cell"></div>
+        </div>
+        <div class="header">話し合い時間</div>
+        <div class="table_table">
+            <div class="box_position table-cell"></div>
+            <div class="box_operator table-cell"><input type="button" id="btn_decrementOfTalkingTime" class="btn btn-raised btn-default btn_operator" value="－"></div>
+            <div class="box_value table-cell"><div id="scrn_talkingTimeInWaiting"></div></div>
+            <div class="box_operator table-cell"><input type="button" id="btn_incrementOfTalkingTime" class="btn btn-raised btn-default btn_operator" value="＋"></div>
+        </div>
+
+        <input type="button" id="btn_gameStart" class="btn btn-raised btn-default btn_main" value="ゲーム開始">
+        <input type="button" id="btn_backInWaiting" class="btn btn-raised btn-default btn_main" value="村を出る">
     </body>
     <script type="text/javascript" src="{{url('static_file', filepath='js/sha256.js')}}"></script>
     <script type="text/javascript" src="{{url('static_file', filepath='js/common.js')}}"></script>
     <script type="text/javascript">
+        let timer;
+        let playerArray = [];
         window.addEventListener('load',
             function (event) {
                 let session_id = '{{session_id}}';
                 let password = window.localStorage.getItem("password");
                 let shaObj = new jsSHA(session_id + password, "ASCII");
                 let sha256digest = shaObj.getHash("SHA-256", "HEX");
+                playerArray = [];
                 document.cookie = 'session_id=' + encodeURIComponent(sha256digest) + '; path=/';
                 console.log('session_id = ' + getCookie('session_id'))
+                timer = setInterval(updateTimer, 1000);
             }
         , false);
+        function updateTimer() {
+            console.log('ENTER: updateTimer');
+            getFromAPI('http://' + hostname + ':' + port + '/api/{{village_name}}/state/', afterGetState)
+
+        }
+        function afterGetState(status, response) {
+            console.log('status = ' + status);
+            console.log('response = ' + response);
+            data = JSON.parse(response);
+            if (status == 200) {
+                let sessionId = data['session_id'] + '';
+                let state = data['state'];
+                let password = window.localStorage.getItem("password") + '';
+                let shaObj = new jsSHA(sessionId + password, "ASCII");
+                let sha256digest = shaObj.getHash("SHA-256", "HEX");
+                document.cookie = 'session_id=' + encodeURIComponent(sha256digest) + '; path=/';
+                console.log('session_id = ' + getCookie('session_id'))
+
+                if (state == 'waiting') {
+                    getFromAPI('http://' + hostname + ':' + port + '/api/{{village_name}}/player/', afterGetPlayer)
+                }
+                else {
+                    window.location.reload();
+                }
+            }
+        }
+        function afterGetPlayer(status, response) {
+            console.log('status = ' + status);
+            console.log('response = ' + response);
+            data = JSON.parse(response);
+            if (status == 200) {
+                let nowPlayerArray = [];
+                for (let i = 0; i < data.length; i++) {
+                    let id = data[i]['id'];
+                    let name = data[i]['name'];
+                    let player = {id: id, name: name};
+                    nowPlayerArray.push(player);
+                }
+                if (changePlayerArray(nowPlayerArray) == true) {
+                    playerArray = [];
+                    tbody = document.getElementById('tbody_playerListInWaiting');
+                    tbody.textContent = null;
+                    for (let i = 0; nowPlayerArray.length; i++) {
+                        playerArray.push(nowPlayerArray[i]);
+                        let id = playerArray[i].id;
+                        let name = playerArray[i].name;
+                        tr = document.createElement('tr');
+                        td = document.createElement('td');
+                        tr.id = 'tr_playerListInWaiting' + id;
+                        td.innerHTML = name;
+                        tr.appendChild(td);
+                        tbody.appendChild(tr);
+                    }
+                }
+            }
+        }
+        //プレイヤー配列に変更があったか確認
+        function changePlayerArray(tempPlayerArray) {
+            if (playerArray.length != tempPlayerArray.length) {
+                return true;
+            }
+            for (let i = 0; playerArray.length; i++) {
+                let flag = false;
+                for (let j = 0; tempPlayerArray.length; j++) {
+                    if (playerArray[i].id == tempPlayerArray[j].id) {
+                        flag = true;
+                    }
+                }
+                if (flag == false) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
     </script>
 </html>

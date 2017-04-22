@@ -1,0 +1,161 @@
+@charset "UTF-8";
+
+html {
+}
+
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+body {
+    width: 100%;
+    text-align: center;
+    font-size: 1.4rem;
+    color: Black;
+    background-color: White;
+}
+
+h1 {
+    font-size: 3rem;
+}
+
+th {
+    padding: 5px 0;
+    font-size: 2rem;
+}
+
+td {
+    padding: 5px 0;
+    font-size: 3rem;
+}
+
+.state {
+    width: 90%;
+    margin: 40px auto;
+}
+
+.header {
+    width: 100%;
+    margin: 30px auto 0;
+    font-size: 3rem;
+    text-align: left;
+}
+
+.btn_main {
+    display: block;
+    width: 100%;
+    margin: 80px auto;
+    padding: 30px 0;
+    font-size: 4rem;
+    text-transform: none;
+}
+
+.btn_spectator {
+    display: inline-block;
+    width: 100%;
+    padding: 10px;
+    font-size: 3rem;
+    text-transform: none;
+}
+
+.btn_operator {
+    display: inline-block;
+    width: 100%;
+    padding: 10px;
+    font-size: 3rem;
+    text-transform: none;
+}
+
+.btn_selection {
+    display: block;
+    width: 100%;
+    margin: 0 0 20px;
+    padding: 10px 0;
+    font-size: 3rem;
+    text-transform: none;
+}
+
+.indention {
+    margin: 0 0 40px;
+}
+
+.box_remaining {
+    padding: 5px 0;
+    font-size: 3rem;
+}
+
+.table_table {
+    display: table;
+    width: 100%;
+    margin: 0 auto 20px;
+}
+
+.table-cell {
+    display: table-cell;
+    padding: 5px 0;
+    font-size: 3rem;
+}
+
+.table_left {
+    display: table;
+    width: 100%;
+    margin: 30px 0;
+}
+
+.box_side {
+    width: 100%;
+    margin: 0 auto 30px;
+}
+
+.box_participant {
+    width: 50%;
+}
+
+.box_top {
+    vertical-align: top;
+}
+
+.box_margin {
+    width: 10%;
+}
+
+.box_position {
+    width: 30%;
+}
+
+.box_point {
+    width: 20%;
+}
+
+.box_operator {
+    width: 20%;
+}
+
+.box_value {
+    width: 30%;
+}
+
+.box_number {
+    width: 20%;
+}
+
+.box_point {
+    width: 50%;
+}
+
+.txt {
+    display: block;
+    width: 100%;
+    height: auto;
+    font-size: 3rem;
+}
+
+.txt_right {
+    text-align: right;
+}
+
+#footer {
+    padding: 50px 0px;
+    border-top: solid;
+}
+

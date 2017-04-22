@@ -1,3 +1,13 @@
+//プレイヤーIDからプレイヤー名を取得
+function getPlayer(id) {
+    for (var i = 0; i < playerArray.length; i++) {
+        if (playerArray[i].id == id) {
+            return playerArray[i];
+        }
+    }
+
+    return null;
+}
 
 //GET
 function getFromAPI(api, afterFunction) {
