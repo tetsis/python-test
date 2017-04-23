@@ -272,6 +272,69 @@ def post_login(village_name):
     r.set_header('Content-Type', 'application/json')
     return r
 
+@get('/api/<village_name:re:[0-9A-Za-z]*>/state/')
+def get_village_state(village_name):
+    flag = is_village(village_name)
+    data = {'village_name': village_name}
+    if flag is True:
+        session_id = request.get_cookie('session_id')
+
+        result = auth(village_name, session_id)
+        player_name = result['player_name']
+        new_session_id = result['new_session_id']
+
+        if player_name != '':
+            conn = psycopg2.connect("host=127.0.0.1 port=5432 dbname=one_night_zinrou user=one_night_zinrou password=one_night_zinrou")
+            dict_cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+            dict_cur.execute("select state.state from village, state where village.state = state.id and (village.name)=(%s)", (village_name,))
+            for row in dict_cur:
+                state = str(row['state'])
+                print(state)
+            data['session_id'] = new_session_id
+            data['state'] = state
+            status = 200
+        else:
+            status = 401
+    else:
+        status = 404
+
+    body = json.dumps(data)
+    r = HTTPResponse(status=status, body=body)
+    r.set_header('Content-Type', 'application/json')
+    return r
+
+@get('/api/<village_name:re:[0-9A-Za-z]*>/player/')
+def get_village_player(village_name):
+    flag = is_village(village_name)
+    data = {'village_name': village_name}
+    if flag is True:
+        session_id = request.get_cookie('session_id')
+
+        result = auth(village_name, session_id)
+        player_name = result['player_name']
+        new_session_id = result['new_session_id']
+
+        if player_name != '':
+            conn = psycopg2.connect("host=127.0.0.1 port=5432 dbname=one_night_zinrou user=one_night_zinrou password=one_night_zinrou")
+            dict_cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+            dict_cur.execute("select player.id, player.name from player, village where player.village_id = village.id and (village.name)=(%s)", (village_name,))
+            for row in dict_cur:
+                player_id = str(row['id'])
+                player_name = str(row['name'])
+                print(player_id)
+                print(player_name)
+            data['session_id'] = new_session_id
+            status = 200
+        else:
+            status = 401
+    else:
+        status = 404
+
+    body = json.dumps(data)
+    r = HTTPResponse(status=status, body=body)
+    r.set_header('Content-Type', 'application/json')
+    return r
+
 #### /API ####
 
 @route('/static/<filepath:path>', name='static_file')

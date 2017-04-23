@@ -77,6 +77,8 @@
     <script type="text/javascript" src="{{url('static_file', filepath='js/sha256.js')}}"></script>
     <script type="text/javascript" src="{{url('static_file', filepath='js/common.js')}}"></script>
     <script type="text/javascript">
+        let hostname = window.location.hostname;
+        let port = window.location.port;
         let timer;
         let playerArray = [];
         window.addEventListener('load',
@@ -88,7 +90,7 @@
                 playerArray = [];
                 document.cookie = 'session_id=' + encodeURIComponent(sha256digest) + '; path=/';
                 console.log('session_id = ' + getCookie('session_id'))
-                timer = setInterval(updateTimer, 1000);
+                timer = setInterval(updateTimer, 3000);
             }
         , false);
         function updateTimer() {
@@ -99,7 +101,8 @@
         function afterGetState(status, response) {
             console.log('status = ' + status);
             console.log('response = ' + response);
-            data = JSON.parse(response);
+            data = response;
+            console.log(data);
             if (status == 200) {
                 let sessionId = data['session_id'] + '';
                 let state = data['state'];
@@ -120,8 +123,15 @@
         function afterGetPlayer(status, response) {
             console.log('status = ' + status);
             console.log('response = ' + response);
-            data = JSON.parse(response);
+            data = response;
+            console.log(data);
             if (status == 200) {
+                let sessionId = data['session_id'] + '';
+                let password = window.localStorage.getItem("password") + '';
+                let shaObj = new jsSHA(sessionId + password, "ASCII");
+                let sha256digest = shaObj.getHash("SHA-256", "HEX");
+                document.cookie = 'session_id=' + encodeURIComponent(sha256digest) + '; path=/';
+                console.log('session_id = ' + getCookie('session_id'))
                 let nowPlayerArray = [];
                 for (let i = 0; i < data.length; i++) {
                     let id = data[i]['id'];
