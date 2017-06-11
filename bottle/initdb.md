@@ -15,10 +15,13 @@ host    all             all             127.0.0.1/32            md5
 ## PostgreSQLの起動
 ```
 # systemctl start postgresql
+# systemctl enable postgresql
 ```
 
 ## ユーザ作成
 ```
+# su - postgres
+$ psql
 CREATE ROLE one_night_zinrou WITH LOGIN PASSWORD 'one_night_zinrou';
 ```
 
